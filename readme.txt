@@ -17,3 +17,18 @@ This could be advantageous as it provides structured data in a ready-to-use form
 For further details, you can visit the INPI's official website at www.inpi.fr,
 which could also provide additional resources and information
 on accessing their trademark data​ (EPO)​.
+
+23.04.2024 
+
+Infogreffe - This is the official registry of French commercial courts. It provides detailed 
+information on companies registered in France, including their number of employees when available.
+- good for tradenames and registration date
+
+Societe.com - This is another resource where you can find data about French companies,
+ including workforce size.
+
+BODACC (Bulletin Officiel des Annonces Civiles et Commerciales) - This official publication announces
+ changes in the commercial registry, including financial statements of companies, which sometimes lists revenues,
+ particularly for public companies and larger enterprises.
+
+ 
