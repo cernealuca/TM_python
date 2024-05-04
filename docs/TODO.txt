@@ -10,3 +10,5 @@
 
 
 ! de gasit o baza de date care sa dea info constate despre reprezentative
+
+important: de gasit o cale de tradus CSV-uri de pe INPI

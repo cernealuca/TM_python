@@ -31,4 +31,10 @@ BODACC (Bulletin Officiel des Annonces Civiles et Commerciales) - This official 
  changes in the commercial registry, including financial statements of companies, which sometimes lists revenues,
  particularly for public companies and larger enterprises.
 
- 
+ 24.04.2024
+
+ inpi.fr on search company field at advanced search business should be active 
+
+ 30.04.2024
+ inpi.fr we can find here the social capital also!!!
+ societe.com paid to win not so big interest for us.

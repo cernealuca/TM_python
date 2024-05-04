@@ -1,0 +1,18 @@
+Here are some general pricing outlines for the major translation services as of the last updates:
+
+Google Translate API: Google charges $20 per million characters of text for translation. Each entry in your dataset might vary in length, but for estimation, if we assume each entry averages around 100 characters (this could be more or less depending on the fields that need translation), you would need approximately 1,000,000 characters for 10,000 entries.
+Microsoft Translator: Microsoft offers a free tier up to 2 million characters per month, after which the price is about $10 per million characters.
+Amazon Translate: Amazon's pricing is around $15 per million characters.
+Cost Calculation Example
+Using Google Translate as an example:
+
+Characters per Entry: Assume 100 characters on average.
+Total Characters for 10,000 Entries: 10,000 entries * 100 characters = 1,000,000 characters.
+Cost per Million Characters: $20.
+Total Estimated Cost: For 1 million characters, it would cost approximately $20.
+Considerations:
+Efficiency: You can reduce costs by only translating fields that need translation (avoiding numbers, dates, SIREN, etc.).
+Batching: Use batching to manage API calls efficiently and possibly avoid hitting free tier limits if using a service like Microsoft Translator.
+Next Steps:
+You should review which fields actually need translation in your dataset to refine the cost estimate further. If some fields (like dates and numerical identifiers) don't require translation, you'll translate significantly fewer characters than initially estimated.
+
