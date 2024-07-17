@@ -21,6 +21,7 @@ time.sleep(3)
 
 def accept_cookies():
     try:
+        # Wait for the cookie accept button to be clickable and click it
         cookie_button = WebDriverWait(driver, 10).until(
             EC.element_to_be_clickable((By.XPATH, '/html/body/div[2]/div[3]/button[1]'))
         )
@@ -28,56 +29,78 @@ def accept_cookies():
         print("Cookies accepted.")
     except Exception as e:
         print(f"Error finding cookie accept button: {e}")
-
-def click_and_wait(element):
-    driver.execute_script("arguments[0].scrollIntoView(true);", element)
-    WebDriverWait(driver, 10).until(EC.element_to_be_clickable(element)).click()
+        time.sleep(3)
 
 # Accept cookies
 accept_cookies()
 
-# Click the business type field
+# Script 1 functionality
+# Wait for the field to be clickable and click it
 try:
-    field_to_business = WebDriverWait(driver, 10).until(
+    field_to_click = WebDriverWait(driver, 10).until(
         EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[3]/div/div/div[1]/div/fieldset/div[6]/fieldset/div[1]/legend/h3'))
     )
-    click_and_wait(field_to_business)
+    field_to_click.click()
     print("Field clicked.")
 except Exception as e:
     print(f"Error finding and clicking the field: {e}")
 time.sleep(3)
 
-# Click checkboxes except the specified one
-try:
-    checkboxes_business = WebDriverWait(driver, 10).until(
-        EC.presence_of_all_elements_located((By.XPATH, '/html/body/div[1]/main/div[3]/div/div/div[1]/div/fieldset/div[6]/fieldset/div[2]/div/div/div/input'))
-    )
-    
-    for checkbox in checkboxes_business:
-        if checkbox.get_attribute('id') != 'Forme_juridique-1000':
-            if not checkbox.is_selected():
-                try:
-                    click_and_wait(checkbox)
-                    print(f"Checkbox with id {checkbox.get_attribute('id')} clicked.")
-                except Exception as e:
-                    print(f"Error clicking checkbox {checkbox.get_attribute('id')}: {e}")
-        else:
-            print("Checkbox with id Forme_juridique-1000 skipped.")
-except Exception as e:
-    print(f"Error finding and checking checkboxes: {e}")
+# Function to click all checkboxes within the specified parent element
+def click_all_checkboxes(parent_xpath):
+    try:
+        parent_element = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, parent_xpath))
+        )
+        
+        checkboxes = parent_element.find_elements(By.XPATH, './/div/div/input')
+        
+        for checkbox in checkboxes:
+            if checkbox.get_attribute('id') != 'Forme_juridique-1000' and not checkbox.is_selected():
+                checkbox.click()
+                print(f"Checkbox with id {checkbox.get_attribute('id')} clicked.")
+    except Exception as e:
+        print(f"Error finding and checking checkboxes: {e}")
 
+# First pass to click all checkboxes except 'Forme_juridique-1000'
+click_all_checkboxes('/html/body/div[1]/main/div[3]/div/div/div[1]/div/fieldset/div[6]/fieldset/div[2]/div')
+
+# Check and uncheck 'Forme_juridique-1000' if necessary
+try:
+    specific_checkbox = driver.find_element(By.ID, 'Forme_juridique-1000')
+    if specific_checkbox.is_selected():
+        specific_checkbox.click()
+        print("Checkbox with id Forme_juridique-1000 deselected.")
+except Exception as e:
+    print(f"Error finding and deselecting the specific checkbox: {e}")
+
+# Second pass to ensure all checkboxes are clicked
+click_all_checkboxes('/html/body/div[1]/main/div[3]/div/div/div[1]/div/fieldset/div[6]/fieldset/div[2]/div')
+
+# Final check and uncheck 'Forme_juridique-1000' if necessary
+try:
+    specific_checkbox = driver.find_element(By.ID, 'Forme_juridique-1000')
+    if specific_checkbox.is_selected():
+        specific_checkbox.click()
+        print("Checkbox with id Forme_juridique-1000 deselected.")
+except Exception as e:
+    print(f"Error finding and deselecting the specific checkbox: {e}")
+
+# Script 2 functionality
 def click_date_field():
     try:
+        # Click on the "field data debut"
         date_field = WebDriverWait(driver, 10).until(
             EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[3]/div/div/div[1]/div/fieldset/div[9]/fieldset/div[1]/legend/h3'))
         )
-        click_and_wait(date_field)
+        date_field.click()
         print("Date field clicked.")
     except Exception as e:
         print(f"Error clicking the date field: {e}")
 
 def input_start_date():
     try:
+        # Input start date
         start_date_field = WebDriverWait(driver, 10).until(
             EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[3]/div/div/div[1]/div/fieldset/div[9]/fieldset/div[2]/div/div[1]/input'))
         )
@@ -90,8 +113,9 @@ def input_start_date():
 
 def verify_start_date():
     try:
+        # Wait and check if the displayed start date matches the input date
         displayed_start_date = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/main/div[3]/div/div/div[2]/div[1]/div/div[2]/div/div[1]/div/p[1]/span'))
+            EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/main/div[3]/div/div/div[2]/div[1]/div/div[2]/div/div[1]/div/p[400]/span'))
         ).text
         if displayed_start_date == "Depuis le 01/01/1948":
             print("Start date verification successful.")
@@ -105,9 +129,11 @@ def verify_start_date():
 
 def input_end_date():
     try:
+        # Calculate end date (4 years after the start date)
         start_date = datetime.strptime("01/01/1948", "%m/%d/%Y")
-        end_date = (start_date + timedelta(days=365*4)).strftime("%m/%d/%Y")
+        end_date = (start_date + timedelta(days=365*8)).strftime("%m/%d/%Y")
         
+        # Input end date
         end_date_field = WebDriverWait(driver, 10).until(
             EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[3]/div/div/div[1]/div/fieldset/div[9]/fieldset/div[2]/div/div[2]/input'))
         )
@@ -120,10 +146,11 @@ def input_end_date():
 
 def verify_end_date():
     try:
+        # Wait and check if the displayed end date matches the input date
         displayed_end_date = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/main/div[3]/div/div/div[2]/div[1]/div/div[2]/div/div[1]/div/p[2]/span'))
+            EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/main/div[3]/div/div/div[2]/div[1]/div/div[2]/div/div[1]/div/p[401]/span'))
         ).text
-        expected_end_date = "Jusqu'au " + (datetime.strptime("01/01/1948", "%m/%d/%Y") + timedelta(days=365*4)).strftime("%d/%m/%Y")
+        expected_end_date = "Jusqu'au " + (datetime.strptime("01/01/1948", "%m/%d/%Y") + timedelta(days=365*8)).strftime("%m/%d/%Y")
         if displayed_end_date == expected_end_date:
             print("End date verification successful.")
             return True
@@ -134,14 +161,17 @@ def verify_end_date():
         print(f"Error verifying end date: {e}")
         return False
 
+# Click the date field
 click_date_field()
 
+# Input and verify the start date
 start_date_verified = False
 while not start_date_verified:
     input_start_date()
     time.sleep(2)
     start_date_verified = verify_start_date()
 
+# Input and verify the end date
 end_date_verified = False
 while not end_date_verified:
     input_end_date()
@@ -150,4 +180,4 @@ while not end_date_verified:
 
 print("Script completed. The browser will remain open for manual inspection.")
 while True:
-    time.sleep(1000)
+    time.sleep(10)
