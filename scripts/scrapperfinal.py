@@ -6,11 +6,13 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 from datetime import datetime, timedelta
+import os
 import time
 
 # Initialize the WebDriver using WebDriverManager
-service = ChromeService(ChromeDriverManager().install())
-driver = webdriver.Chrome(service=service)
+service = ChromeService(executable_path='C:/Users/Admin/Downloads/chromedriver-win64/chromedriver.exe')  # Use double backslashes or forward slashes
+options = webdriver.ChromeOptions()
+driver = webdriver.Chrome(service=service, options=options)
 
 # URL to be opened
 base_url = 'https://data.inpi.fr/search?advancedSearch=%257B%2522checkboxes%2522%253A%257B%2522status%2522%253A%257B%2522order%2522%253A0%252C%2522searchField%2522%253A%255B%2522is_rad%2522%255D%252C%2522values%2522%253A%255B%257B%2522value%2522%253A%2522false%2522%252C%2522checked%2522%253Atrue%257D%252C%257B%2522value%2522%253A%2522true%2522%252C%2522checked%2522%253Afalse%257D%255D%257D%257D%252C%2522texts%2522%253A%257B%257D%252C%2522multipleSelects%2522%253A%257B%257D%252C%2522dates%2522%253A%257B%257D%257D&displayStyle=List&filter=%257B%257D&nbResultsPerPage=100&order=asc&page=1&q=&searchType=advanced&sort=relevance&type=companies'
@@ -86,7 +88,7 @@ try:
 except Exception as e:
     print(f"Error finding and deselecting the specific checkbox: {e}")
 
-# Script 2 functionality
+# Script 1 date functionality
 def click_date_field():
     try:
         # Click on the "field data debut"
@@ -115,7 +117,7 @@ def verify_start_date():
     try:
         # Wait and check if the displayed start date matches the input date
         displayed_start_date = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/main/div[3]/div/div/div[2]/div[1]/div/div[2]/div/div[1]/div/p[400]/span'))
+            EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/main/div[3]/div/div/div[2]/div[1]/div/div[2]/div/div[1]/div/p[394]/span'))
         ).text
         if displayed_start_date == "Depuis le 01/01/1948":
             print("Start date verification successful.")
@@ -131,7 +133,7 @@ def input_end_date():
     try:
         # Calculate end date (4 years after the start date)
         start_date = datetime.strptime("01/01/1948", "%m/%d/%Y")
-        end_date = (start_date + timedelta(days=365*8)).strftime("%m/%d/%Y")
+        end_date = (start_date + timedelta(days=365*4)).strftime("%m/%d/%Y")
         
         # Input end date
         end_date_field = WebDriverWait(driver, 10).until(
@@ -148,9 +150,9 @@ def verify_end_date():
     try:
         # Wait and check if the displayed end date matches the input date
         displayed_end_date = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/main/div[3]/div/div/div[2]/div[1]/div/div[2]/div/div[1]/div/p[401]/span'))
+            EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/main/div[3]/div/div/div[2]/div[1]/div/div[2]/div/div[1]/div/p[395]/span'))
         ).text
-        expected_end_date = "Jusqu'au " + (datetime.strptime("01/01/1948", "%m/%d/%Y") + timedelta(days=365*8)).strftime("%m/%d/%Y")
+        expected_end_date = "Jusqu'au " + (datetime.strptime("01/01/1948", "%m/%d/%Y") + timedelta(days=365*4)).strftime("%d/%m/%Y")
         if displayed_end_date == expected_end_date:
             print("End date verification successful.")
             return True
@@ -163,6 +165,7 @@ def verify_end_date():
 
 # Click the date field
 click_date_field()
+time.sleep(30)
 
 # Input and verify the start date
 start_date_verified = False
@@ -177,6 +180,128 @@ while not end_date_verified:
     input_end_date()
     time.sleep(2)
     end_date_verified = verify_end_date()
+
+# Script 2 functionality
+# Directory to save CSVs
+csv_dir = 'exported_csvs'
+os.makedirs(csv_dir, exist_ok=True)
+time.sleep(1)
+
+def export_data():
+    page_number = 1
+    while True:
+        # Ensure cookies are accepted
+        if page_number == 1:
+            accept_cookies()
+        
+        # Wait for the "Select All" checkbox to be clickable
+        try:
+            select_all_checkbox = WebDriverWait(driver, 10).until(
+                EC.element_to_be_clickable((By.ID, 'result-all'))
+            )
+            select_all_checkbox.click()
+            print(f"Select All checkbox clicked on page {page_number}.")
+        except Exception as e:
+            print(f"Error finding select all checkbox on page {page_number}: {e}")
+            return
+        
+        # Wait for selection
+        time.sleep(1)
+        
+        # Click the "Export" icon
+        try:
+            export_button = WebDriverWait(driver, 10).until(
+                EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[3]/div/div/div[2]/div[1]/div/div[1]/div/div[1]/div/div[2]/div/button[2]'))
+            )
+            export_button.click()
+            print("Export button clicked.")
+        except Exception as e:
+            print(f"Error finding export button on page {page_number}: {e}")
+            return
+        
+        # Wait for the export dialog
+        time.sleep(1)
+        
+        # Click the confirm export CSV button
+        try:
+            save_csv_button = WebDriverWait(driver, 10).until(
+                EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[9]/div/div/div[2]/form/div[2]/div[2]/input'))
+            )
+            save_csv_button.click()
+            print("Save CSV button clicked.")
+        except Exception as e:
+            print(f"Error finding save CSV button: {e}")
+            return
+
+        # Wait for the dialog to process
+        time.sleep(1)
+        
+        # Click the capital input button
+        try:
+            capital_button = WebDriverWait(driver, 10).until(
+                EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[9]/div/div/div[2]/form/div[3]/div[2]/div[8]/input'))
+            )
+            capital_button.click()
+            print("Capital input button clicked.")
+        except Exception as e:
+            print(f"Error finding capital input button: {e}")
+            return
+        
+        # Click the statut input button
+        try:
+            statut_button = WebDriverWait(driver, 10).until(
+                EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[9]/div/div/div[2]/form/div[3]/div[2]/div[11]/input'))
+            )
+            statut_button.click()
+            print("Statut input button clicked.")
+        except Exception as e:
+            print(f"Error finding statut input button: {e}")
+            return
+
+        # Click the form juridique input button
+        try:
+            form_juridique_button = WebDriverWait(driver, 10).until(
+                EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[9]/div/div/div[2]/form/div[3]/div[2]/div[6]/input'))
+            )
+            form_juridique_button.click()
+            print("Form juridique input button clicked.")
+        except Exception as e:
+            print(f"Error finding form juridique input button: {e}")
+            return
+
+        # Click the final export button
+        try:
+            final_export_button = WebDriverWait(driver, 10).until(
+                EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[9]/div/div/div[2]/form/div[4]/div/button[2]'))
+            )
+            final_export_button.click()
+            print("Final export button clicked.")
+        except Exception as e:
+            print(f"Error finding final export button: {e}")
+            return
+        
+        # Wait for the download to complete
+        time.sleep(1)
+        
+        # Check if the "Next" button is present and visible
+        try:
+            next_page_button = WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.XPATH, "//a[contains(text(),'Suivant')]"))
+            )
+            if next_page_button.is_displayed():
+                next_page_button.click()
+                print("Next page button clicked.")
+                page_number += 1
+                time.sleep(1)
+            else:
+                print("Next page button is not visible.")
+                break
+        except Exception as e:
+            print("No more pages to navigate or next page button not found.")
+            break
+
+# Export data for the current page and navigate to the next pages
+export_data()
 
 print("Script completed. The browser will remain open for manual inspection.")
 while True:

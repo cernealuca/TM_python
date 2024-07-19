@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 import time
 
 # Initialize the WebDriver using WebDriverManager
-service = ChromeService(ChromeDriverManager().install())
+service = ChromeService(executable_path='C:/Users/Admin/Downloads/chromedriver-win64/chromedriver.exe')  # Use double backslashes or forward slashes
 driver = webdriver.Chrome(service=service)
 
 # URL to be opened
@@ -70,27 +70,17 @@ def verify_start_date():
         print(f"Error verifying start date: {e}")
         return False
 
-
 def input_end_date():
-
     try:
         # Calculate end date (4 years after the start date)
         start_date = datetime.strptime("01/01/1948", "%m/%d/%Y")
-        end_date = (start_date + timedelta(days=365*8)).strftime("%m/%d/%Y")
+        end_date = (start_date + timedelta(days=365*4)).strftime("%m/%d/%Y")
         
         # Input end date
         end_date_field = WebDriverWait(driver, 10).until(
             EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[3]/div/div/div[1]/div/fieldset/div[9]/fieldset/div[2]/div/div[2]/input'))
         )
-
-        # resets date filter field
         end_date_field.clear()
-        print("----------------------------------------")
-
-        print("after date filter field reset, send end-date keys")
-        print("end_date is: ")
-        print(end_date)
-        print("-------------------------")
         end_date_field.send_keys(end_date)
         end_date_field.send_keys(Keys.RETURN)
         print(f"End date set to {end_date}")
@@ -103,7 +93,7 @@ def verify_end_date():
         displayed_end_date = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/main/div[3]/div/div/div[2]/div[1]/div/div[2]/div/div[1]/div/p[2]/span'))
         ).text
-        expected_end_date = "Jusqu'au " + (datetime.strptime("01/01/1948", "%m/%d/%Y") + timedelta(days=365*8)).strftime("%m/%d/%Y")
+        expected_end_date = "Jusqu'au " + (datetime.strptime("01/01/1948", "%m/%d/%Y") + timedelta(days=365*4)).strftime("%d/%m/%Y")
         if displayed_end_date == expected_end_date:
             print("End date verification successful.")
             return True

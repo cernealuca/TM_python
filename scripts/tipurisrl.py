@@ -7,7 +7,7 @@ from selenium.webdriver.support import expected_conditions as EC
 import time
 
 # Initialize the WebDriver using WebDriverManager
-service = ChromeService(ChromeDriverManager().install())
+service = ChromeService(executable_path='C:/Users/Admin/Downloads/chromedriver-win64/chromedriver.exe')  # Use double backslashes or forward slashes
 driver = webdriver.Chrome(service=service)
 
 # URL to be opened
