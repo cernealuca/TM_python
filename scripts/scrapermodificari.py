@@ -172,21 +172,22 @@ time.sleep(30)
 start_date_verified = False
 while not start_date_verified:
     input_start_date()
-    time.sleep(3)
+    time.sleep(2)
     start_date_verified = verify_start_date()
 
 # Input and verify the end date
 end_date_verified = False
 while not end_date_verified:
     input_end_date()
-    time.sleep(3)
+    time.sleep(2)
     end_date_verified = verify_end_date()
 
 # Script 2 functionality
 # Directory to save CSVs
 csv_dir = 'exported_csvs'
 os.makedirs(csv_dir, exist_ok=True)
-time.sleep(3)
+time.sleep(1)
+
 
 def export_data():
     page_number = 1
@@ -222,7 +223,8 @@ def export_data():
             return
         
         # Wait for the export dialog
-        time.sleep(3)
+        time.sleep(1)
+        
         # Click the confirm export CSV button
         try:
             save_csv_button = WebDriverWait(driver, 10).until(
@@ -236,22 +238,39 @@ def export_data():
 
         # Wait for the dialog to process
         time.sleep(3)
-        # Function to check and click the "Select All" checkbox in the CSV export dialog
-        def check_and_click_select_all():
-            try:
-                select_all_csv_checkbox = WebDriverWait(driver, 10).until(
-                    EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[9]/div/div/div[2]/form/div[3]/div[1]/div[1]/input'))
-                )
-                if not select_all_csv_checkbox.is_selected():
-                    select_all_csv_checkbox.click()
-                    print("Select All CSV checkbox clicked.")
-                else:
-                    print("Select All CSV checkbox was already clicked.")
-            except Exception as e:
-                print(f"Error finding and clicking Select All CSV checkbox: {e}")
+        
+        # Click the capital input button
+        try:
+            capital_button = WebDriverWait(driver, 10).until(
+                EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[9]/div/div/div[2]/form/div[3]/div[2]/div[8]/input'))
+            )
+            capital_button.click()
+            print("Capital input button clicked.")
+        except Exception as e:
+            print(f"Error finding capital input button: {e}")
+            return
+        
+        # Click the statut input button
+        try:
+            statut_button = WebDriverWait(driver, 10).until(
+                EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[9]/div/div/div[2]/form/div[3]/div[2]/div[11]/input'))
+            )
+            statut_button.click()
+            print("Statut input button clicked.")
+        except Exception as e:
+            print(f"Error finding statut input button: {e}")
+            return
 
-        # Call the function to check and click the "Select All" checkbox
-        check_and_click_select_all()
+        # Click the form juridique input button
+        try:
+            form_juridique_button = WebDriverWait(driver, 10).until(
+                EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[9]/div/div/div[2]/form/div[3]/div[2]/div[6]/input'))
+            )
+            form_juridique_button.click()
+            print("Form juridique input button clicked.")
+        except Exception as e:
+            print(f"Error finding form juridique input button: {e}")
+            return
 
         # Click the final export button
         try:
@@ -263,18 +282,20 @@ def export_data():
         except Exception as e:
             print(f"Error finding final export button: {e}")
             return
-        
-        # Wait for the download to complete
-        time.sleep(3)
         try:
             select_all_checkbox = WebDriverWait(driver, 10).until(
                 EC.element_to_be_clickable((By.ID, 'result-all'))
             )
             select_all_checkbox.click()
-            print(f"Select All checkbox clicked on page {page_number}.")
+            print(f"Select All checkbox UNclicked on page {page_number}.")
         except Exception as e:
             print(f"Error finding select all checkbox on page {page_number}: {e}")
             return
+        
+        
+        # Wait for the download to complete
+        time.sleep(1)
+        
         # Check if the "Next" button is present and visible
         try:
             next_page_button = WebDriverWait(driver, 10).until(
@@ -291,7 +312,7 @@ def export_data():
         except Exception as e:
             print("No more pages to navigate or next page button not found.")
             break
-
+        
 # Export data for the current page and navigate to the next pages
 export_data()
 

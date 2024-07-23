@@ -8,8 +8,9 @@ import os
 import time
 
 # Initialize the WebDriver using WebDriverManager
-service = ChromeService(ChromeDriverManager().install())
-driver = webdriver.Chrome(service=service)
+service = ChromeService(executable_path='C:/Users/Admin/Downloads/chromedriver-win64/chromedriver.exe')  # Use double backslashes or forward slashes
+options = webdriver.ChromeOptions()
+driver = webdriver.Chrome(service=service, options=options)
 
 # URL for the first page
 base_url = 'https://data.inpi.fr/search?advancedSearch=%257B%2522checkboxes%2522%253A%257B%2522status%2522%253A%257B%2522order%2522%253A0%252C%2522searchField%2522%253A%255B%2522is_rad%2522%255D%252C%2522values%2522%253A%255B%257B%2522value%2522%253A%2522false%2522%252C%2522checked%2522%253Atrue%257D%252C%257B%2522value%2522%253A%2522true%2522%252C%2522checked%2522%253Afalse%257D%255D%257D%257D%252C%2522texts%2522%253A%257B%257D%252C%2522multipleSelects%2522%253A%257B%257D%252C%2522dates%2522%253A%257B%257D%257D&displayStyle=List&filter=%257B%2522denominationOuNomPatronymique.folding%2522%253A%2522efa%2522%257D&nbResultsPerPage=100&order=asc&page={}'
