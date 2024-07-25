@@ -118,7 +118,7 @@ def verify_start_date():
     try:
         # Wait and check if the displayed start date matches the input date
         displayed_start_date = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/main/div[3]/div/div/div[2]/div[1]/div/div[2]/div/div[1]/div/p[399]/span'))
+            EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/main/div[3]/div/div/div[2]/div[1]/div/div[2]/div/div[1]/div/p[400]/span'))
         ).text
         if displayed_start_date == "Depuis le 01/01/1948":
             print("Start date verification successful.")
@@ -151,7 +151,7 @@ def verify_end_date():
     try:
         # Wait and check if the displayed end date matches the input date
         displayed_end_date = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/main/div[3]/div/div/div[2]/div[1]/div/div[2]/div/div[1]/div/p[400]/span'))
+            EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/main/div[3]/div/div/div[2]/div[1]/div/div[2]/div/div[1]/div/p[401]/span'))
         ).text
         expected_end_date = "Jusqu'au " + (datetime.strptime("01/01/1948", "%m/%d/%Y") + timedelta(days=365*4)).strftime("%d/%m/%Y")
         if displayed_end_date == expected_end_date:
