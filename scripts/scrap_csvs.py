@@ -20,17 +20,25 @@ csv_dir = 'exported_csvs'
 os.makedirs(csv_dir, exist_ok=True)
 time.sleep(1)
 
+def retry_on_failure(action, *args, **kwargs):
+    while True:
+        try:
+            action(*args, **kwargs)
+            break
+        except Exception as e:
+            print(f"Retrying due to: {e}")
+            time.sleep(2)
+
 def accept_cookies():
-    try:
+    def action():
         # Wait for the cookie accept button to be clickable and click it
         cookie_button = WebDriverWait(driver, 10).until(
             EC.element_to_be_clickable((By.XPATH, '/html/body/div[2]/div[3]/button[1]'))
         )
         cookie_button.click()
         print("Cookies accepted.")
-    except Exception as e:
-        print(f"Error finding cookie accept button: {e}")
-        time.sleep(3)
+    
+    retry_on_failure(action)
 
 def export_data():
     page_number = 1
@@ -44,108 +52,108 @@ def export_data():
             accept_cookies()
         
         # Wait for the "Select All" checkbox to be clickable
-        try:
+        def select_all_checkbox_action():
             select_all_checkbox = WebDriverWait(driver, 10).until(
                 EC.element_to_be_clickable((By.ID, 'result-all'))
             )
-            select_all_checkbox.click()
+            driver.execute_script("arguments[0].scrollIntoView();", select_all_checkbox)
+            driver.execute_script("arguments[0].click();", select_all_checkbox)
             print(f"Select All checkbox clicked on page {page_number}.")
-        except Exception as e:
-            print(f"Error finding select all checkbox on page {page_number}: {e}")
-            return
+
+        retry_on_failure(select_all_checkbox_action)
         
         # Wait for selection
         time.sleep(1)
         
         # Click the "Export" icon
-        try:
+        def export_button_action():
             export_button = WebDriverWait(driver, 10).until(
                 EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[3]/div/div/div[2]/div[1]/div/div[1]/div/div[1]/div/div[2]/div/button[2]'))
             )
-            export_button.click()
+            driver.execute_script("arguments[0].scrollIntoView();", export_button)
+            driver.execute_script("arguments[0].click();", export_button)
             print("Export button clicked.")
-        except Exception as e:
-            print(f"Error finding export button on page {page_number}: {e}")
-            return
+        
+        retry_on_failure(export_button_action)
         
         # Wait for the export dialog
         time.sleep(1)
         
         # Click the confirm export CSV button
-        try:
+        def save_csv_button_action():
             save_csv_button = WebDriverWait(driver, 10).until(
                 EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[9]/div/div/div[2]/form/div[2]/div[2]/input'))
             )
-            save_csv_button.click()
+            driver.execute_script("arguments[0].scrollIntoView();", save_csv_button)
+            driver.execute_script("arguments[0].click();", save_csv_button)
             print("Save CSV button clicked.")
-        except Exception as e:
-            print(f"Error finding save CSV button: {e}")
-            return
-
+        
+        retry_on_failure(save_csv_button_action)
+        
         # Wait for the dialog to process
         time.sleep(1)
         
         # Click the capital input button
-        try:
+        def capital_button_action():
             capital_button = WebDriverWait(driver, 10).until(
                 EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[9]/div/div/div[2]/form/div[3]/div[2]/div[8]/input'))
             )
-            capital_button.click()
+            driver.execute_script("arguments[0].scrollIntoView();", capital_button)
+            driver.execute_script("arguments[0].click();", capital_button)
             print("Capital input button clicked.")
-        except Exception as e:
-            print(f"Error finding capital input button: {e}")
-            return
+        
+        retry_on_failure(capital_button_action)
         
         # Click the statut input button
-        try:
+        def statut_button_action():
             statut_button = WebDriverWait(driver, 10).until(
                 EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[9]/div/div/div[2]/form/div[3]/div[2]/div[11]/input'))
             )
-            statut_button.click()
+            driver.execute_script("arguments[0].scrollIntoView();", statut_button)
+            driver.execute_script("arguments[0].click();", statut_button)
             print("Statut input button clicked.")
-        except Exception as e:
-            print(f"Error finding statut input button: {e}")
-            return
-
+        
+        retry_on_failure(statut_button_action)
+        
         # Click the form juridique input button
-        try:
+        def form_juridique_button_action():
             form_juridique_button = WebDriverWait(driver, 10).until(
                 EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[9]/div/div/div[2]/form/div[3]/div[2]/div[6]/input'))
             )
-            form_juridique_button.click()
+            driver.execute_script("arguments[0].scrollIntoView();", form_juridique_button)
+            driver.execute_script("arguments[0].click();", form_juridique_button)
             print("Form juridique input button clicked.")
-        except Exception as e:
-            print(f"Error finding form juridique input button: {e}")
-            return
-
+        
+        retry_on_failure(form_juridique_button_action)
+        
         # Click the final export button
-        try:
+        def final_export_button_action():
             final_export_button = WebDriverWait(driver, 10).until(
                 EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[9]/div/div/div[2]/form/div[4]/div/button[2]'))
             )
-            final_export_button.click()
+            driver.execute_script("arguments[0].scrollIntoView();", final_export_button)
+            driver.execute_script("arguments[0].click();", final_export_button)
             print("Final export button clicked.")
-        except Exception as e:
-            print(f"Error finding final export button: {e}")
-            return
+        
+        retry_on_failure(final_export_button_action)
         
         # Wait for the download to complete
         time.sleep(1)
         
         # Check if the "Next" button is present and visible
-        try:
+        def next_page_button_action():
             next_page_button = WebDriverWait(driver, 10).until(
                 EC.presence_of_element_located((By.XPATH, "//a[contains(text(),'Suivant')]"))
             )
             if next_page_button.is_displayed():
                 next_page_button.click()
                 print("Next page button clicked.")
-                page_number += 1
-                time.sleep(1)
+                return True
             else:
                 print("Next page button is not visible.")
-                break
-        except Exception as e:
+                return False
+
+        if not retry_on_failure(next_page_button_action):
             print("No more pages to navigate or next page button not found.")
             break
 
@@ -157,3 +165,5 @@ accept_cookies()
 export_data()
 
 print("Script completed. The browser will remain open for manual inspection.")
+while True:
+    time.sleep(10)

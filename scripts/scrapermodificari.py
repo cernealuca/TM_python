@@ -25,7 +25,7 @@ time.sleep(3)
 def accept_cookies():
     try:
         # Wait for the cookie accept button to be clickable and click it
-        cookie_button = WebDriverWait(driver, 10).until(
+        cookie_button = WebDriverWait(driver, 60).until(
             EC.element_to_be_clickable((By.XPATH, '/html/body/div[2]/div[3]/button[1]'))
         )
         cookie_button.click()
@@ -40,7 +40,7 @@ time.sleep(10)
 def click_date_field():
     try:
         # Click on the "field data debut"
-        date_field = WebDriverWait(driver, 10).until(
+        date_field = WebDriverWait(driver, 60).until(
             EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[3]/div/div/div[1]/div/fieldset/div[9]/fieldset/div[1]/legend/h3'))
         )
         date_field.click()
@@ -51,7 +51,7 @@ def click_date_field():
 def input_start_date():
     try:
         # Input start date
-        start_date_field = WebDriverWait(driver, 10).until(
+        start_date_field = WebDriverWait(driver, 60).until(
             EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[3]/div/div/div[1]/div/fieldset/div[9]/fieldset/div[2]/div/div[1]/input'))
         )
         start_date_field.clear()
@@ -64,7 +64,7 @@ def input_start_date():
 def verify_start_date():
     try:
         # Wait and check if the displayed start date matches the input date
-        displayed_start_date = WebDriverWait(driver, 10).until(
+        displayed_start_date = WebDriverWait(driver, 60).until(
             EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/main/div[3]/div/div/div[2]/div[1]/div/div[2]/div/div[1]/div/p[1]/span'))
         ).text
         if displayed_start_date == "Depuis le 01/01/1948":
@@ -84,7 +84,7 @@ def input_end_date():
         end_date = (start_date + timedelta(days=365*4)).strftime("%m/%d/%Y")
         
         # Input end date
-        end_date_field = WebDriverWait(driver, 10).until(
+        end_date_field = WebDriverWait(driver, 60).until(
             EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[3]/div/div/div[1]/div/fieldset/div[9]/fieldset/div[2]/div/div[2]/input'))
         )
         end_date_field.clear()
@@ -97,7 +97,7 @@ def input_end_date():
 def verify_end_date():
     try:
         # Wait and check if the displayed end date matches the input date
-        displayed_end_date = WebDriverWait(driver, 10).until(
+        displayed_end_date = WebDriverWait(driver, 60).until(
             EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/main/div[3]/div/div/div[2]/div[1]/div/div[2]/div/div[1]/div/p[2]/span'))
         ).text
         expected_end_date = "Jusqu'au " + (datetime.strptime("01/01/1948", "%m/%d/%Y") + timedelta(days=365*4)).strftime("%d/%m/%Y")
@@ -132,7 +132,7 @@ while not end_date_verified:
 time.sleep(10)
 # Wait for the field to be clickable and click it
 try:
-    field_to_click = WebDriverWait(driver, 10).until(
+    field_to_click = WebDriverWait(driver, 60).until(
         EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[3]/div/div/div[1]/div/fieldset/div[6]/fieldset/div[1]/legend/h3'))
     )
     field_to_click.click()
@@ -144,7 +144,7 @@ time.sleep(3)
 # Function to click all checkboxes within the specified parent element
 def click_all_checkboxes(parent_xpath):
     try:
-        parent_element = WebDriverWait(driver, 10).until(
+        parent_element = WebDriverWait(driver, 60).until(
             EC.presence_of_element_located((By.XPATH, parent_xpath))
         )
         
@@ -198,25 +198,27 @@ time.sleep(10)
 def export_data():
     page_number = 1
     while True:
-        time.sleep(3)
+        
         
         # Wait for the "Select All" checkbox to be clickable and click it
         try:
-            select_all_checkbox = WebDriverWait(driver, 10).until(
+            select_all_checkbox = WebDriverWait(driver, 60).until(
                 EC.element_to_be_clickable((By.ID, 'result-all'))
             )
-            select_all_checkbox.click()
+            
+            driver.execute_script("arguments[0].scrollIntoView();", select_all_checkbox)
+            driver.execute_script("arguments[0].click();", select_all_checkbox)
             print(f"Select All checkbox clicked on page {page_number}.")
         except Exception as e:
             print(f"Error finding select all checkbox on page {page_number}: {e}")
             return
         
         # Wait for selection
-        time.sleep(3)
+        # time.sleep(10)
         
         # Click the "Export" icon
         try:
-            export_button = WebDriverWait(driver, 10).until(
+            export_button = WebDriverWait(driver, 60).until(
                 EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[3]/div/div/div[2]/div[1]/div/div[1]/div/div[1]/div/div[2]/div/button[2]'))
             )
             export_button.click()
@@ -229,7 +231,7 @@ def export_data():
         time.sleep(3)
         # Click the confirm export CSV button
         try:
-            save_csv_button = WebDriverWait(driver, 10).until(
+            save_csv_button = WebDriverWait(driver, 60).until(
                 EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[9]/div/div/div[2]/form/div[2]/div[2]/input'))
             )
             save_csv_button.click()
@@ -243,9 +245,10 @@ def export_data():
         # Function to check and click the "Select All" checkbox in the CSV export dialog
         def check_and_click_select_all():
             try:
-                select_all_csv_checkbox = WebDriverWait(driver, 10).until(
+                select_all_csv_checkbox = WebDriverWait(driver, 60).until(
                     EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[9]/div/div/div[2]/form/div[3]/div[1]/div[1]/input'))
                 )
+                time.sleep(3)
                 if not select_all_csv_checkbox.is_selected():
                     select_all_csv_checkbox.click()
                     print("Select All CSV checkbox clicked.")
@@ -259,7 +262,7 @@ def export_data():
 
         # Click the final export button
         try:
-            final_export_button = WebDriverWait(driver, 10).until(
+            final_export_button = WebDriverWait(driver, 60).until(
                 EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[9]/div/div/div[2]/form/div[4]/div/button[2]'))
             )
             final_export_button.click()
@@ -271,7 +274,7 @@ def export_data():
         # Wait for the download to complete
         time.sleep(3)
         try:
-            select_all_checkbox = WebDriverWait(driver, 10).until(
+            select_all_checkbox = WebDriverWait(driver, 60).until(
                 EC.element_to_be_clickable((By.ID, 'result-all'))
             )
             driver.execute_script("arguments[0].click();", select_all_checkbox)
@@ -282,7 +285,7 @@ def export_data():
         time.sleep(3)
         # Check if the "Next" button is present and visible
         try:
-            next_page_button = WebDriverWait(driver, 10).until(
+            next_page_button = WebDriverWait(driver, 60).until(
                 EC.presence_of_element_located((By.XPATH, "//a[contains(text(),'Suivant')]"))
             )
             if next_page_button.is_displayed():
@@ -299,6 +302,7 @@ def export_data():
 
 # Export data for the current page and navigate to the next pages
 export_data()
+time.sleep(10)
 
 print("Script completed. The browser will remain open for manual inspection.")
 while True:
