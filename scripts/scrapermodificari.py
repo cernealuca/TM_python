@@ -1,26 +1,46 @@
+import csv
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service as ChromeService
-from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
-from datetime import datetime, timedelta
+from webdriver_manager.chrome import ChromeDriverManager
 from selenium.common.exceptions import UnexpectedAlertPresentException, NoAlertPresentException
+import pandas as pd
 import os
+import glob
 import time
-
+from datetime import datetime, timedelta
 # Initialize the WebDriver using WebDriverManager
 service = ChromeService(executable_path='C:/Users/Admin/Downloads/chromedriver-win64/chromedriver.exe')  # Use double backslashes or forward slashes
 options = webdriver.ChromeOptions()
+
+# Set the default download directory for Chrome
+csv_dir = 'exported_csvs'
+os.makedirs(csv_dir, exist_ok=True)
+
+options.add_experimental_option('prefs', {
+    "download.default_directory": os.path.abspath(csv_dir),  # Change default directory for downloads
+    "download.prompt_for_download": False,  # Disable download prompt
+    "directory_upgrade": True  # For existing directories, don't ask for confirmation
+})
+
+# Predefined header for the merged CSV
+PREDEFINED_HEADER = [
+    "Dénomination / Nom", "Début d'activité", "SIREN", "Représentants",
+    "Adresse du siège", "Forme juridique", "Activité", "Département",
+    "Etablissements", "Capital", "Statut"
+]
+
 driver = webdriver.Chrome(service=service, options=options)
 
 # URL to be opened
-base_url = 'https://data.inpi.fr/search?advancedSearch=%257B%2522checkboxes%2522%253A%257B%2522status%2522%253A%257B%2522order%2522%253A0%252C%2522searchField%2522%253A%255B%2522is_rad%2522%255D%252C%2522values%2522%253A%255B%257B%2522value%2522%253A%2522false%2522%252C%2522checked%2522%253Atrue%257D%252C%257B%2522value%2522%253A%2522true%2522%252C%2522checked%2522%253Afalse%257D%255D%257D%257D%252C%2522texts%2522%253A%257B%257D%252C%2522multipleSelects%2522%253A%257B%257D%252C%2522dates%2522%253A%257B%257D%257D&displayStyle=List&filter=%257B%257D&nbResultsPerPage=100&order=asc&page=1&q=&searchType=advanced&sort=relevance&type=companies'
+base_url = 'https://data.inpi.fr/search?advancedSearch=%257B%2522checkboxes%2522%253A%257B%2522status%2522%253A%257B%2522order%2522%253A0%252C%2522searchField%2522%253A%255B%2522is_rad%2522%255D%252C%2522values%2522%253A%255B%257B%2522value%2522%253A%2522false%2522%252C%2522checked%2522%253Atrue%257D%252C%257B%2522value%2522%253A%2522true%2522%252C%2522checked%2522%253Afalse%257D%255D%257D%257D%252C%2522texts%2522%253A%257B%257D%252C%2522multipleSelects%2522%253A%257B%257D%252C%2522dates%2522%253A%257B%257D%257D&displayStyle=List&filter=%257B%257D&nbResultsPerPage=100&order=asc&page=1&q=&searchType=advanced&sort=idt_date_debut_activ&type=companies'
 
 # Open the URL
 driver.get(base_url)
-time.sleep(3)
+time.sleep(5)
 
 def accept_cookies():
     try:
@@ -37,6 +57,7 @@ def accept_cookies():
 # Accept cookies
 accept_cookies()
 time.sleep(10)
+
 def click_date_field():
     try:
         # Click on the "field data debut"
@@ -81,7 +102,7 @@ def input_end_date():
     try:
         # Calculate end date (4 years after the start date)
         start_date = datetime.strptime("01/01/1948", "%m/%d/%Y")
-        end_date = (start_date + timedelta(days=365*4)).strftime("%m/%d/%Y")
+        end_date = (start_date + timedelta(days=110)).strftime("%m/%d/%Y")
         
         # Input end date
         end_date_field = WebDriverWait(driver, 60).until(
@@ -100,7 +121,7 @@ def verify_end_date():
         displayed_end_date = WebDriverWait(driver, 60).until(
             EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/main/div[3]/div/div/div[2]/div[1]/div/div[2]/div/div[1]/div/p[2]/span'))
         ).text
-        expected_end_date = "Jusqu'au " + (datetime.strptime("01/01/1948", "%m/%d/%Y") + timedelta(days=365*4)).strftime("%d/%m/%Y")
+        expected_end_date = "Jusqu'au " + (datetime.strptime("01/01/1948", "%m/%d/%Y") + timedelta(days=110)).strftime("%d/%m/%Y")
         if displayed_end_date == expected_end_date:
             print("End date verification successful.")
             return True
@@ -119,14 +140,18 @@ time.sleep(5)
 start_date_verified = False
 while not start_date_verified:
     input_start_date()
-    time.sleep(10)
+    time.sleep(15)
+    #aici mai trebuie faceut ceva sa ne asiguram ca apuca sa se seteze data inainte sa se mai schimbe pagina
+    #si apoi sa treaca la verificare
     start_date_verified = verify_start_date()
 
 # Input and verify the end date
 end_date_verified = False
 while not end_date_verified:
     input_end_date()
-    time.sleep(10)
+    time.sleep(15)
+    #aici mai trebuie faceut ceva sa ne asiguram ca apuca sa se seteze data inainte sa se mai schimbe pagina
+    #si apoi sa treaca la verificare
     end_date_verified = verify_end_date()
     
 time.sleep(10)
@@ -191,15 +216,11 @@ try:
 except Exception as e:
     print(f"Error finding and deselecting the specific checkbox: {e}")
 
-csv_dir = 'exported_csvs'
-os.makedirs(csv_dir, exist_ok=True)
 time.sleep(10)
 
 def export_data():
     page_number = 1
     while True:
-        
-        
         # Wait for the "Select All" checkbox to be clickable and click it
         try:
             select_all_checkbox = WebDriverWait(driver, 60).until(
@@ -303,6 +324,67 @@ def export_data():
 # Export data for the current page and navigate to the next pages
 export_data()
 time.sleep(10)
+
+# Function to clean each CSV file by removing the first three rows
+def clean_csv_file(file_path):
+    with open(file_path, 'r', encoding='utf-8') as file:
+        lines = file.readlines()
+
+    # Remove the first three rows
+    clean_lines = lines[3:]
+
+    # Convert the cleaned lines back to a DataFrame
+    from io import StringIO
+    clean_data = StringIO(''.join(clean_lines))
+    df = pd.read_csv(clean_data, sep=';', header=None)
+
+    return df
+
+# Merge all cleaned CSV files into a single CSV
+def merge_csv_files(directory, output_file):
+    all_files = glob.glob(os.path.join(directory, "*.csv"))
+    all_data = []
+    bad_files = []
+
+    # Ensure the directory contains CSV files
+    if not all_files:
+        print("No CSV files found in the directory.")
+        return
+
+    # Iterate over all files
+    for file in all_files:
+        try:
+            # Clean the CSV file and get the DataFrame
+            df = clean_csv_file(file)
+
+            # Assign the predefined header to each dataframe
+            df.columns = PREDEFINED_HEADER
+
+            all_data.append(df)
+        except pd.errors.ParserError as e:
+            print(f"ParserError encountered in file {file}: {e}")
+            bad_files.append(file)
+        except Exception as e:
+            print(f"Error reading {file}: {e}")
+            bad_files.append(file)
+
+    if bad_files:
+        print("The following files had issues and were skipped:")
+        for bad_file in bad_files:
+            print(bad_file)
+
+    if all_data:
+        # Concatenate all dataframes
+        merged_df = pd.concat(all_data, ignore_index=True)
+
+        # Write the merged data to CSV with the predefined header
+        merged_df.to_csv(output_file, sep=';', index=False, quoting=csv.QUOTE_ALL)
+        print(f"All CSV files merged into {output_file}")
+    else:
+        print("No data to merge.")
+
+# Call the merge function
+merge_csv_files(csv_dir, os.path.join(csv_dir, "merged_data.csv"))
 
 print("Script completed. The browser will remain open for manual inspection.")
 while True:
