@@ -1,0 +1,93 @@
+
+
+1. **Classe 1**: Produits chimiques destinés à l'industrie, aux sciences, à la photographie, ainsi qu'à l'agriculture, l'horticulture et la sylviculture; résines artificielles à l'état brut, matières plastiques à l'état brut; engrais; compositions pour éteindre le feu; préparations pour la trempe et la soudure des métaux; produits chimiques destinés à conserver les aliments; matières tannantes; adhésifs (matières collantes) destinés à l'industrie.
+
+2. **Classe 2**: Peintures, vernis, laques; produits contre la rouille et contre la détérioration du bois; colorants; mordants; résines naturelles à l'état brut; métaux en feuilles et en poudre pour peintres, décorateurs, imprimeurs et artistes.
+
+3. **Classe 3**: Preparations pour blanchir et autres substances pour lessiver; preparations pour nettoyer, polir, dégraisser et abraser; savons; parfumerie, huiles essentielles, cosmétiques, lotions pour les cheveux; dentifrices.
+
+4. **Classe 4**: Huiles et graisses industrielles; lubrifiants; produits pour absorber, arroser et lier la poussière; combustibles (y compris l'essence pour moteurs) et matières éclairantes; bougies et mèches pour l'éclairage.
+
+5. **Classe 5**: Produits pharmaceutiques et vétérinaires; produits hygiéniques pour la médecine; aliments pour bébés; emplâtres, matériel pour pansements; matières pour plomber les dents et pour empreintes dentaires; désinfectants; produits pour la destruction des animaux nuisibles; fongicides, herbicides.
+
+6. **Classe 6**: Métaux communs et leurs alliages; matériaux de construction métalliques; constructions transportables métalliques; câbles et fils métalliques non électriques; quincaillerie métallique; tuyaux métalliques; coffres-forts; produits métalliques non compris dans d'autres classes; minerais.
+
+7. **Classe 7**: Machines et machines-outils; moteurs (à l'exception des moteurs pour véhicules terrestres); accouplements et organes de transmission (à l'exception de ceux pour véhicules terrestres); instruments agricoles autres que ceux à main; incubateurs pour œufs; distributeurs automatiques.
+
+8. **Classe 8**: Outils et instruments à main entraînés manuellement; coutellerie, fourchettes et cuillers; armes blanches; rasoirs.
+
+9. **Classe 9**: Appareils et instruments scientifiques, de recherche, de navigation, de relevé, photographiques, cinématographiques, audiovisuels, optiques, de pesage, de mesurage, de signalisation, de détection, de test, d'inspection, de secours (sauvetage) et d'enseignement; appareils et instruments pour la conduction, la distribution, la transformation, l'accumulation, la régulation ou le contrôle de l'électricité; appareils et instruments pour l'enregistrement, la transmission, la reproduction ou le traitement du son, des images ou des données; supports d'enregistrement magnétiques, disques acoustiques; disques compacts, DVD et autres supports d'enregistrement numériques; mécanismes pour appareils à pré-paiement; caisses enregistreuses, machines à calculer, équipement de traitement de données, ordinateurs; logiciels; supports d'enregistrement numérique téléchargeables; applications logicielles téléchargeables; dispositifs de détection des incendies.
+
+10. **Classe 10**: Appareils et instruments chirurgicaux, médicaux, dentaires et vétérinaires; membres, yeux et dents artificiels; articles orthopédiques; matériel de suture; dispositifs thérapeutiques et d'assistance adaptés aux personnes handicapées; appareils de massage; appareils, dispositifs et articles de puériculture; dispositifs, appareils et articles de sexualité.
+
+11. **Classe 11**: Appareils et installations d'éclairage, de chauffage, de refroidissement, de production de vapeur, de cuisson, de séchage, de ventilation, de distribution d'eau et installations sanitaires.
+
+12. **Classe 12**: Véhicules; appareils de locomotion par terre, par air ou par eau.
+
+13. **Classe 13**: Armes à feu; munitions et projectiles; explosifs; feux d'artifice.
+
+14. **Classe 14**: Métaux précieux et leurs alliages; bijoux, joaillerie, pierres précieuses; horlogerie et instruments chronométriques.
+
+15. **Classe 15**: Instruments de musique; pupitres à musique; supports pour instruments de musique.
+
+16. **Classe 16**: Papiers, cartons et produits en ces matières, non compris dans d'autres classes; imprimés; articles pour reliures; photographies; papeterie et articles de bureau (à l'exception des meubles); adhésifs (matières collantes) pour la papeterie ou le ménage; matériel pour les artistes; pinceaux; machines à écrire et articles de bureau (à l'exception des meubles); matériel d'instruction ou d'enseignement (à l'exception des appareils); matières plastiques pour l'emballage (non comprises dans d'autres classes); caractères d'imprimerie; clichés.
+
+17. **Classe 17**: Caoutchouc, gutta-percha, gomme, amiante, mica et produits en ces matières non compris dans d'autres classes; produits en matières plastiques mi-ouvrées; matières à calfeutrer, à étouper et à isoler; tuyaux flexibles non métalliques.
+
+18. **Classe 18**: Cuir et imitations du cuir; peaux d'animaux; malles et valises; parapluies et parasols; cannes; fouets et sellerie.
+
+19. **Classe 19**: Matériaux de construction non métalliques; tuyaux rigides non métalliques pour la construction; asphalte, poix et bitume; constructions transportables non métalliques; monuments non métalliques.
+
+20. **Classe 20**: Meubles, glaces (miroirs), cadres; produits (non compris dans d'autres classes) en bois, liège, roseau, jonc, osier, corne, os, ivoire, baleine, écaille, ambre, nacre, écume de mer et succédanés de toutes ces matières ou en matières plastiques.
+
+21. **Classe 21**: Ustensiles et récipients pour le ménage ou la cuisine; peignes et éponges; brosses (à l'exception des pinceaux); matériaux pour la brosserie; instruments de nettoyage actionnés manuellement; paille de fer; verre brut ou mi-ouvré (à l'exception du verre de construction); verrerie, porcelaine et faïence non comprises dans d'autres classes.
+
+22. **Classe 22**: Cordages, cordes, filets, tentes, bâches, voiles, sacs (non compris dans d'autres classes); matières de rembourrage (à l'exception du caoutchouc ou des matières plastiques); matières textiles fibreuses brutes.
+
+23. **Classe 23**: Fils pour le textile.
+
+24. **Classe 24**: Tissus et produits textiles non compris dans d'autres classes; couvertures de lit et de table.
+
+25. **Classe 25**: Vêtements, chaussures, chapellerie.
+
+26. **Classe 26**: Dentelles et broderies, rubans et lacets; boutons, crochets et œillets, épingles et aiguilles; fleurs artificielles; ornements pour les cheveux; fausses barbes.
+
+27. **Classe 27**: Tapis, paillassons, nattes, linoléums et autres revêtements de sols; tentures murales (non en matières textiles).
+
+28. **Classe 28**: Jeux, jouets; articles de gymnastique et de sport non compris dans d'autres classes; décorations pour arbres de Noël.
+
+### Classes de Services
+
+29. **Classe 29**: Viandes, poissons, volaille et gibier; extraits de viande; fruits et légumes conservés, congelés, séchés et cuits; gelées, confitures, compotes; œufs; lait et produits laitiers; huiles et graisses comestibles.
+
+30. **Classe 30**: Café, thé, cacao et succédanés du café; riz; tapioca et sagou; farines et préparations faites de céréales; pain, pâtisserie et confiserie; chocolat; glaces alimentaires; sucre, miel, sirop de mélasse; levure, poudre pour faire lever; sel, moutarde; vinaigre, sauces (condiments); épices; glace à rafraîchir.
+
+31. **Classe 31**: Produits agricoles, horticoles, forestiers et graines non compris dans d'autres classes; animaux vivants; fruits et légumes frais; semences, plantes et fleurs naturelles; aliments pour les animaux; malt.
+
+32. **Classe 32**: Bières; eaux minérales et gazeuses et autres boissons non alcooliques; boissons de fruits et jus de fruits; sirops et autres préparations pour faire des boissons.
+
+33. **Classe 33**: Boissons alcoolisées (à l'exception des bières).
+
+34. **Classe 34**: Tabac; articles pour fumeurs; allumettes.
+
+35. **Classe 35**: Publicité; gestion des affaires commerciales; administration commerciale; travaux de bureau.
+
+36. **Classe 36**: Assurances; affaires financières; affaires monétaires; affaires immobilières.
+
+37. **Classe 37**: Services de construction; services de réparation; services d'installation.
+
+38. **Classe 38**: Télécommunications.
+
+39. **Classe 39**: Transport; emballage et entreposage de marchandises; organisation de voyages.
+
+40. **Classe 40**: Traitement de matériaux.
+
+41. **Classe 41**: Éducation; formation; divertissement; activités sportives et culturelles.
+
+42. **Classe 42**: Services scientifiques et technologiques ainsi que services de recherche et de conception y relatifs; services d'analyses et de recherches industrielles; conception et développement d'ordinateurs et de logiciels.
+
+43. **Classe 43**: Services de restauration (alimentation); hébergement temporaire.
+
+44. **Classe 44**: Services médicaux; services vétérinaires; soins d'hygiène et de beauté pour l'homme ou pour les animaux; services d'agriculture, d'horticulture et de sylviculture.
+
+45. **Classe 45**: Services juridiques; services de sécurité pour la protection des biens et des individus; services personnels et sociaux rendus par des tiers destinés à satisfaire les besoins des individus.

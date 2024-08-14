@@ -17,15 +17,15 @@ from pymongo import MongoClient  # Import MongoClient from pymongo
 
 # Initialize MongoDB connection
 mongo_client = MongoClient("mongodb://localhost:27017/")  # Replace with your MongoDB URI
-db = mongo_client["scraping_data"]  # Database name
-collection = db["companies"]  # Collection name
+db = mongo_client["scraping_TM_France_data"]  # Database name
+collection = db["TM_France"]  # Collection name
 
 # Initialize the WebDriver using WebDriverManager
 service = ChromeService(executable_path='C:/Users/Admin/Downloads/chromedriver-win64/chromedriver.exe')  # Use double backslashes or forward slashes
 options = webdriver.ChromeOptions()
 
 # Set the default download directory for Chrome
-csv_dir = 'exported_csvs'
+csv_dir = 'trademark_csvs'
 os.makedirs(csv_dir, exist_ok=True)
 
 options.add_experimental_option('prefs', {
@@ -36,15 +36,20 @@ options.add_experimental_option('prefs', {
 
 # Predefined header for the merged CSV
 PREDEFINED_HEADER = [
-    "Dénomination / Nom", "Début d'activité", "SIREN", "Représentants",
-    "Adresse du siège", "Forme juridique", "Activité", "Département",
-    "Etablissements", "Capital", "Statut"
+    "Logo / Image", "Origine", "N° de la marque", "Marque", "Translitération / traduction", 
+    "Type de la marque", "Date de dépôt/enregistrement", "Pays de priorité", "Date de priorité",
+    "n° de priorité", "Classification des éléments figuratifs (Vienne)", "Classification de Nice",
+    "Produits et services", "Nom du déposant", "SIREN du déposant", "Département du déposant", 
+    "Pays du déposant", "Nom du mandataire", "SIREN du mandataire", "Département du mandataire", 
+    "Pays du mandataire", "Statut", "Pays d'ancienneté", "Date d'ancienneté", "n° d'ancienneté", 
+    "Pays désignés"
 ]
+
 
 driver = webdriver.Chrome(service=service, options=options)
 
 # URL to be opened
-base_url = 'https://data.inpi.fr/search?advancedSearch=%257B%2522checkboxes%2522%253A%257B%2522status%2522%253A%257B%2522order%2522%253A0%252C%2522searchField%2522%253A%255B%2522is_rad%2522%255D%252C%2522values%2522%253A%255B%257B%2522value%2522%253A%2522false%2522%252C%2522checked%2522%253Atrue%257D%252C%257B%2522value%2522%253A%2522true%2522%252C%2522checked%2522%253Afalse%257D%255D%257D%257D%252C%2522texts%2522%253A%257B%257D%252C%2522multipleSelects%2522%253A%257B%257D%252C%2522dates%2522%253A%257B%257D%257D&displayStyle=List&filter=%257B%257D&nbResultsPerPage=100&order=asc&page=1&q=&searchType=advanced&sort=idt_date_debut_activ&type=companies'
+base_url = 'https://data.inpi.fr/search?advancedSearch=%257B%2522checkboxes%2522%253A%257B%2522bases_choice%2522%253A%257B%2522order%2522%253A0%252C%2522searchField%2522%253A%255B%2522registrationOfficeCode%2522%255D%252C%2522values%2522%253A%255B%257B%2522value%2522%253A%2522FR%2522%252C%2522checked%2522%253Atrue%257D%252C%257B%2522value%2522%253A%2522EM%2522%252C%2522checked%2522%253Atrue%257D%252C%257B%2522value%2522%253A%2522WO%2522%252C%2522checked%2522%253Atrue%257D%255D%257D%252C%2522brands_validity%2522%253A%257B%2522order%2522%253A1%252C%2522searchField%2522%253A%255B%2522expiryDate%2522%255D%252C%2522values%2522%253A%255B%257B%2522value%2522%253A%2522applicable%2522%252C%2522checked%2522%253Atrue%257D%252C%257B%2522value%2522%253A%2522not_applicable%2522%252C%2522checked%2522%253Afalse%257D%255D%257D%257D%252C%2522texts%2522%253A%257B%257D%252C%2522multipleSelects%2522%253A%257B%257D%252C%2522dates%2522%253A%257B%257D%257D&displayStyle=List&filter=%257B%257D&nbResultsPerPage=100&order=asc&page=1&q=&searchType=advanced&sort=applicationDate&type=brands'
 
 # Open the URL
 driver.get(base_url)
@@ -70,7 +75,7 @@ def click_date_field():
     try:
         # Click on the "field data debut"
         date_field = WebDriverWait(driver, 60).until(
-            EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[3]/div/div/div[1]/div/fieldset/div[9]/fieldset/div[1]/legend/h3'))
+            EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[3]/div/div/div[1]/div/fieldset/div[5]/fieldset/div[1]'))
         )
         date_field.click()
         print("Date field clicked.")
@@ -81,7 +86,7 @@ def input_start_date():
     try:
         # Input start date
         start_date_field = WebDriverWait(driver, 60).until(
-            EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[3]/div/div/div[1]/div/fieldset/div[9]/fieldset/div[2]/div/div[1]/input'))
+            EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[3]/div/div/div[1]/div/fieldset/div[5]/fieldset/div[2]/div/div[1]/input'))
         )
         start_date_field.clear()
         start_date_field.send_keys("01/01/1948")
@@ -110,11 +115,11 @@ def input_end_date():
     try:
         # Calculate end date (4 years after the start date)
         start_date = datetime.strptime("01/01/1948", "%m/%d/%Y")
-        end_date = (start_date + timedelta(days=365*10)).strftime("%m/%d/%Y")
+        end_date = (start_date + timedelta(days=365*2)).strftime("%m/%d/%Y")
         
         # Input end date
         end_date_field = WebDriverWait(driver, 60).until(
-            EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[3]/div/div/div[1]/div/fieldset/div[9]/fieldset/div[2]/div/div[2]/input'))
+            EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[3]/div/div/div[1]/div/fieldset/div[5]/fieldset/div[2]/div/div[2]/input'))
         )
         end_date_field.clear()
         end_date_field.send_keys(end_date)
@@ -129,7 +134,7 @@ def verify_end_date():
         displayed_end_date = WebDriverWait(driver, 60).until(
             EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/main/div[3]/div/div/div[2]/div[1]/div/div[2]/div/div[1]/div/p[2]/span'))
         ).text
-        expected_end_date = "Jusqu'au " + (datetime.strptime("01/01/1948", "%m/%d/%Y") + timedelta(days=365*10)).strftime("%d/%m/%Y")
+        expected_end_date = "Jusqu'au " + (datetime.strptime("01/01/1948", "%m/%d/%Y") + timedelta(days=365*2)).strftime("%d/%m/%Y")
         if displayed_end_date == expected_end_date:
             print("End date verification successful.")
             return True
@@ -161,70 +166,6 @@ while not end_date_verified:
     #aici mai trebuie faceut ceva sa ne asiguram ca apuca sa se seteze data inainte sa se mai schimbe pagina
     #si apoi sa treaca la verificare
     end_date_verified = verify_end_date()
-    
-time.sleep(10)
-# Wait for the field to be clickable and click it
-try:
-    field_to_click = WebDriverWait(driver, 60).until(
-        EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[3]/div/div/div[1]/div/fieldset/div[6]/fieldset/div[1]/legend/h3'))
-    )
-    field_to_click.click()
-    print("Field clicked.")
-except Exception as e:
-    print(f"Error finding and clicking the field: {e}")
-time.sleep(3)
-
-# Function to click all checkboxes within the specified parent element
-def click_all_checkboxes(parent_xpath):
-    try:
-        parent_element = WebDriverWait(driver, 60).until(
-            EC.presence_of_element_located((By.XPATH, parent_xpath))
-        )
-        
-        checkboxes = parent_element.find_elements(By.XPATH, './/div/div/input')
-        remaining_checkboxes = [checkbox for checkbox in checkboxes if checkbox.get_attribute('id') != 'Forme_juridique-1000' and not checkbox.is_selected()]
-        
-        while remaining_checkboxes:
-            for checkbox in remaining_checkboxes:
-                try:
-                    driver.execute_script("arguments[0].scrollIntoView();", checkbox)
-                    WebDriverWait(driver, 10).until(
-                        EC.element_to_be_clickable((By.XPATH, f'//*[@id="{checkbox.get_attribute("id")}"]'))
-                    ).click()
-                    print(f"Checkbox with id {checkbox.get_attribute('id')} clicked.")
-                except Exception as e:
-                    print(f"Error clicking checkbox with id {checkbox.get_attribute('id')}: {e}")
-                    continue
-            
-            checkboxes = parent_element.find_elements(By.XPATH, './/div/div/input')
-            remaining_checkboxes = [checkbox for checkbox in checkboxes if checkbox.get_attribute('id') != 'Forme_juridique-1000' and not checkbox.is_selected()]
-        
-        print("All required checkboxes clicked.")
-    except Exception as e:
-        print(f"Error finding and checking checkboxes: {e}")
-
-# Check and uncheck 'Forme_juridique-1000' if necessary
-try:
-    specific_checkbox = driver.find_element(By.ID, 'Forme_juridique-1000')
-    if specific_checkbox.is_selected():
-        specific_checkbox.click()
-        print("Checkbox with id Forme_juridique-1000 deselected.")
-except Exception as e:
-    print(f"Error finding and deselecting the specific checkbox: {e}")
-
-# Ensure all checkboxes are clicked
-click_all_checkboxes('/html/body/div[1]/main/div[3]/div/div/div[1]/div/fieldset/div[6]/fieldset/div[2]/div')
-
-# Final check and uncheck 'Forme_juridique-1000' if necessary
-try:
-    specific_checkbox = driver.find_element(By.ID, 'Forme_juridique-1000')
-    if specific_checkbox.is_selected():
-        specific_checkbox.click()
-        print("Checkbox with id Forme_juridique-1000 deselected.")
-except Exception as e:
-    print(f"Error finding and deselecting the specific checkbox: {e}")
-
-time.sleep(10)
 
 def export_data():
     page_number = 1
@@ -261,7 +202,7 @@ def export_data():
         # Click the confirm export CSV button
         try:
             save_csv_button = WebDriverWait(driver, 60).until(
-                EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[9]/div/div/div[2]/form/div[2]/div[2]/input'))
+                EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[8]/div/div/div[2]/form/div[2]/div[2]/input'))
             )
             save_csv_button.click()
             print("Save CSV button clicked.")
@@ -271,15 +212,15 @@ def export_data():
 
         # Wait for the dialog to process
         time.sleep(3)
-        # Function to check and click the "Select All" checkbox in the CSV export dialog
-        def check_and_click_select_all():
+        # Function to check and click the "Select logo to not appear" checkbox in the CSV export dialog
+        def check_and_click_logo_checkbox():
             try:
-                select_all_csv_checkbox = WebDriverWait(driver, 60).until(
+                logo_checkbox = WebDriverWait(driver, 60).until(
                     EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[9]/div/div/div[2]/form/div[3]/div[1]/div[1]/input'))
                 )
                 time.sleep(3)
-                if not select_all_csv_checkbox.is_selected():
-                    select_all_csv_checkbox.click()
+                if logo_checkbox.is_selected():
+                    logo_checkbox.click()
                     print("Select All CSV checkbox clicked.")
                 else:
                     print("Select All CSV checkbox was already clicked.")
@@ -287,12 +228,12 @@ def export_data():
                 print(f"Error finding and clicking Select All CSV checkbox: {e}")
 
         # Call the function to check and click the "Select All" checkbox
-        check_and_click_select_all()
+        check_and_click_logo_checkbox()
 
         # Click the final export button
         try:
             final_export_button = WebDriverWait(driver, 60).until(
-                EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[9]/div/div/div[2]/form/div[4]/div/button[2]'))
+                EC.element_to_be_clickable((By.XPATH, '//html/body/div[1]/main/div[8]/div/div/div[2]/form/div[4]/div/button[2]'))
             )
             final_export_button.click()
             print("Final export button clicked.")
@@ -333,7 +274,6 @@ def export_data():
 export_data()
 time.sleep(10)
 
-# Function to clean each CSV file by removing the first three rows
 def clean_csv_file(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
         lines = file.readlines()
@@ -397,7 +337,7 @@ def merge_csv_files(directory, output_file):
         print("No data to merge.")
 
 # Call the merge function
-merge_csv_files(csv_dir, os.path.join(csv_dir, "merged_data.csv"))
+merge_csv_files(csv_dir, os.path.join(csv_dir, "mergedTM_data.csv"))
 
 print("Script completed. The browser will remain open for manual inspection.")
 while True:
