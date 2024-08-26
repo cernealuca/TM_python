@@ -6,7 +6,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 from webdriver_manager.chrome import ChromeDriverManager
-from selenium.common.exceptions import UnexpectedAlertPresentException, NoAlertPresentException
 import pandas as pd
 import os
 import glob
@@ -36,8 +35,8 @@ options.add_experimental_option('prefs', {
 # Predefined header for the merged CSV
 PREDEFINED_HEADER = [
     "Logo / Image", "Origine", "N° de la marque", "Marque", "Translitération / traduction", 
-    "Type de la marque", "Date de dépôt/enregistrement", "Pays de priorité", "Date de priorité",
-    "n° de priorité", "Classification des éléments figuratifs (Vienne)", "Classification de Nice",
+    "Type de la marque", "Date de dépôt/enregistrement", "Pays de prioritate", "Date de prioritate",
+    "n° de prioritate", "Classification des éléments figuratifs (Vienne)", "Classification de Nice",
     "Produits et servicii", "Nom du déposant", "SIREN du déposant", "Département du déposant", 
     "Pays du déposant", "Nom du mandataire", "SIREN du mandataire", "Département du mandataire", 
     "Pays du mandataire", "Statut", "Pays d'ancienneté", "Date d'ancienneté", "n° d'ancienneté", 
@@ -121,7 +120,7 @@ def verify_end_date(expected_date):
             EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/main/div[3]/div/div/div[2]/div[1]/div/div[2]/div/div[1]/div/p[2]/span'))
         ).text
         if displayed_end_date == f"Jusqu'au {expected_date}":
-            print("End date verification successful.")
+            print(f"End date verification successful: {displayed_end_date}")
             return True
         else:
             print(f"End date verification failed. Displayed: {displayed_end_date}")
@@ -129,6 +128,47 @@ def verify_end_date(expected_date):
     except Exception as e:
         print(f"Error verifying end date: {e}")
         return False
+
+# Function to get the number of results
+def get_result_count():
+    retries = 3  # Retry a few times if it fails
+    for attempt in range(retries):
+        try:
+            result_count_text = WebDriverWait(driver, 60).until(
+                EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/main/div[3]/div/div/div[2]/div[1]/div/div[3]/span[2]'))
+            ).text
+            # Extract the total results number from the string
+            result_count = int(result_count_text.split('sur')[1].split('résultats')[0].replace(' ', '').replace('.', '').replace(',', ''))
+            print(f"Result count retrieved: {result_count}")
+            return result_count
+        except Exception as e:
+            print(f"Error getting result count (attempt {attempt + 1} of {retries}): {e}")
+            time.sleep(5)  # Wait and retry
+    return None
+
+# Function to adjust end date if results exceed 10,000
+def adjust_end_date_if_needed(start_date, end_date):
+    while True:
+        input_end_date(end_date)
+        time.sleep(15)  # Allow time for results to load
+
+        # Verify the end date is set correctly before counting results
+        end_date_verified = verify_end_date(datetime.strptime(end_date, "%m/%d/%Y").strftime("%d/%m/%Y"))
+        if not end_date_verified:
+            print(f"End date {end_date} not verified, retrying...")
+            continue
+        
+        result_count = get_result_count()
+        
+        if result_count is not None and result_count > 10000:
+            print(f"Result count is {result_count}, which exceeds 10,000. Adjusting the end date.")
+            # Reduce the timeframe by 1/3
+            total_days = (datetime.strptime(end_date, "%m/%d/%Y") - datetime.strptime(start_date, "%m/%d/%Y")).days
+            new_total_days = total_days * 2 // 3
+            end_date = (datetime.strptime(start_date, "%m/%d/%Y") + timedelta(days=new_total_days)).strftime("%m/%d/%Y")
+            print(f"New end date set to {end_date}")
+        else:
+            return end_date
 
 # Function to export data
 def export_data():
@@ -149,7 +189,7 @@ def export_data():
             export_button = WebDriverWait(driver, 60).until(
                 EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[3]/div/div/div[2]/div[1]/div/div[1]/div/div[1]/div/div[2]/div/button[2]'))
             )
-            export_button.click()
+            driver.execute_script("arguments[0].click();", export_button)
             print("Export button clicked.")
         except Exception as e:
             print(f"Error finding export button on page {page_number}: {e}")
@@ -161,7 +201,7 @@ def export_data():
             save_csv_button = WebDriverWait(driver, 60).until(
                 EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[8]/div/div/div[2]/form/div[2]/div[2]/input'))
             )
-            save_csv_button.click()
+            driver.execute_script("arguments[0].click();", save_csv_button)
             print("Save CSV button clicked.")
         except Exception as e:
             print(f"Error finding save CSV button: {e}")
@@ -169,23 +209,23 @@ def export_data():
 
         time.sleep(3)
 
-        try:
-            logo_checkbox = WebDriverWait(driver, 60).until(
-                EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[9]/div/div/div[2]/form/div[3]/div[1]/div[1]/input'))
-            )
-            if logo_checkbox.is_selected():
-                logo_checkbox.click()
-                print("Logo checkbox deselected.")
-            else:
-                print("Logo checkbox was already deselected.")
-        except Exception as e:
-            print(f"Error finding logo checkbox: {e}")
+        # try:
+        #     logo_checkbox = WebDriverWait(driver, 60).until(
+        #         EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[9]/div/div/div[2]/form/div[3]/div[1]/div[1]/input'))
+        #     )
+        #     if logo_checkbox.is_selected():
+        #         logo_checkbox.click()
+        #         print("Logo checkbox deselected.")
+        #     else:
+        #         print("Logo checkbox was already deselected.")
+        # except Exception as e:
+        #     print(f"Error finding logo checkbox: {e}")
 
         try:
             final_export_button = WebDriverWait(driver, 60).until(
                 EC.element_to_be_clickable((By.XPATH, '//html/body/div[1]/main/div[8]/div/div/div[2]/form/div[4]/div/button[2]'))
             )
-            final_export_button.click()
+            driver.execute_script("arguments[0].click();", final_export_button)
             print("Final export button clicked.")
         except Exception as e:
             print(f"Error finding final export button: {e}")
@@ -280,8 +320,8 @@ while True:
     click_date_field()
     time.sleep(5)
     
-    end_date = (datetime.strptime(start_date, "%d/%m/%Y") + timedelta(days=365*2)).strftime("%m/%d/%Y")
-    end_date_display = (datetime.strptime(start_date, "%d/%m/%Y") + timedelta(days=365*2)).strftime("%d/%m/%Y")
+    # Initialize end date
+    end_date = (datetime.strptime(start_date, "%d/%m/%Y") + timedelta(days=365*20)).strftime("%m/%d/%Y")
     
     start_date_verified = False
     while not start_date_verified:
@@ -291,9 +331,10 @@ while True:
     
     end_date_verified = False
     while not end_date_verified:
+        end_date = adjust_end_date_if_needed(start_date, end_date)
         input_end_date(end_date)
         time.sleep(15)
-        end_date_verified = verify_end_date(end_date_display)
+        end_date_verified = verify_end_date(datetime.strptime(end_date, "%m/%d/%Y").strftime("%d/%m/%Y"))
     
     export_data()
     time.sleep(10)
@@ -301,4 +342,4 @@ while True:
     merge_csv_files(csv_dir, os.path.join(csv_dir, "mergedTM_data.csv"))
     
     # Update the start date for the next iteration
-    start_date = end_date_display
+    start_date = datetime.strptime(end_date, "%m/%d/%Y").strftime("%d/%m/%Y")
