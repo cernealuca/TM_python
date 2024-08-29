@@ -12,6 +12,7 @@ import glob
 import time
 from datetime import datetime, timedelta
 from pymongo import MongoClient
+from selenium.common.exceptions import NoAlertPresentException
 
 # Initialize MongoDB connection
 mongo_client = MongoClient("mongodb://localhost:27017/")  # Replace with your MongoDB URI
@@ -147,8 +148,9 @@ def get_result_count():
     return None
 
 # Function to adjust end date if results exceed 10,000
-def adjust_end_date_if_needed(start_date, end_date):
+def adjust_end_date_if_needed(start_date, end_date, initial_days):
     while True:
+        # Set the end date only if it's not already verified
         input_end_date(end_date)
         time.sleep(15)  # Allow time for results to load
 
@@ -160,15 +162,31 @@ def adjust_end_date_if_needed(start_date, end_date):
         
         result_count = get_result_count()
         
-        if result_count is not None and result_count > 10000:
+        if result_count is not None and result_count > 800:
             print(f"Result count is {result_count}, which exceeds 10,000. Adjusting the end date.")
             # Reduce the timeframe by 1/3
-            total_days = (datetime.strptime(end_date, "%m/%d/%Y") - datetime.strptime(start_date, "%m/%d/%Y")).days
-            new_total_days = total_days * 2 // 3
+            new_total_days = initial_days * 2 // 3
             end_date = (datetime.strptime(start_date, "%m/%d/%Y") + timedelta(days=new_total_days)).strftime("%m/%d/%Y")
             print(f"New end date set to {end_date}")
+            initial_days = new_total_days  # Update the initial_days for the next iteration
         else:
-            return end_date
+            # When the result count is within acceptable limits, skip setting the end date again.
+            if result_count is not None and result_count <= 300:
+                print(f"Result count {result_count} is within limits. Proceeding without changing the end date.")
+                return end_date, initial_days
+
+# Function to handle any alert that may appear
+def handle_alert():
+    try:
+        # Switch to the alert
+        alert = driver.switch_to.alert
+        # Print the alert text if needed for debugging
+        print(f"Alert text: {alert.text}")
+        # Accept the alert (this is equivalent to pressing "OK")
+        alert.accept()
+        print("Alert accepted.")
+    except NoAlertPresentException:
+        print("No alert present.")
 
 # Function to export data
 def export_data():
@@ -208,18 +226,6 @@ def export_data():
             return
 
         time.sleep(3)
-
-        # try:
-        #     logo_checkbox = WebDriverWait(driver, 60).until(
-        #         EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[9]/div/div/div[2]/form/div[3]/div[1]/div[1]/input'))
-        #     )
-        #     if logo_checkbox.is_selected():
-        #         logo_checkbox.click()
-        #         print("Logo checkbox deselected.")
-        #     else:
-        #         print("Logo checkbox was already deselected.")
-        # except Exception as e:
-        #     print(f"Error finding logo checkbox: {e}")
 
         try:
             final_export_button = WebDriverWait(driver, 60).until(
@@ -308,7 +314,8 @@ def merge_csv_files(directory, output_file):
         print("No data to merge.")
 
 # Continuous loop to execute the process
-start_date = "01/01/1948"  # Initial start date
+start_date = "01/01/1968"  # Initial start date
+initial_days = 365  # Define the initial number of days
 
 while True:
     driver.get(base_url)
@@ -321,7 +328,7 @@ while True:
     time.sleep(5)
     
     # Initialize end date
-    end_date = (datetime.strptime(start_date, "%d/%m/%Y") + timedelta(days=365*20)).strftime("%m/%d/%Y")
+    end_date = (datetime.strptime(start_date, "%d/%m/%Y") + timedelta(days=initial_days)).strftime("%m/%d/%Y")
     
     start_date_verified = False
     while not start_date_verified:
@@ -331,12 +338,23 @@ while True:
     
     end_date_verified = False
     while not end_date_verified:
-        end_date = adjust_end_date_if_needed(start_date, end_date)
-        input_end_date(end_date)
-        time.sleep(15)
-        end_date_verified = verify_end_date(datetime.strptime(end_date, "%m/%d/%Y").strftime("%d/%m/%Y"))
+        # Adjust end date only if necessary
+        new_end_date, initial_days = adjust_end_date_if_needed(start_date, end_date, initial_days)
+    
+        # Only verify the end date if it was actually adjusted
+        if new_end_date != end_date:
+            end_date_verified = verify_end_date(datetime.strptime(new_end_date, "%m/%d/%Y").strftime("%d/%m/%Y"))
+            end_date = new_end_date
+        else:
+            end_date_verified = True
+            print(f"End date {end_date} retained as no adjustment was necessary.")
+
     
     export_data()
+
+    time.sleep(3)
+     # Handle any alert that may appear after export
+    handle_alert()
     time.sleep(10)
     
     merge_csv_files(csv_dir, os.path.join(csv_dir, "mergedTM_data.csv"))
