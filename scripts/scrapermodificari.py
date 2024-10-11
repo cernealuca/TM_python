@@ -1,4 +1,3 @@
-# Import necessary libraries
 import csv
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -7,25 +6,25 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 from webdriver_manager.chrome import ChromeDriverManager
-from selenium.common.exceptions import UnexpectedAlertPresentException, NoAlertPresentException
 import pandas as pd
 import os
 import glob
 import time
 from datetime import datetime, timedelta
-from pymongo import MongoClient  # Import MongoClient from pymongo
+from pymongo import MongoClient
+from selenium.common.exceptions import NoAlertPresentException
 
 # Initialize MongoDB connection
 mongo_client = MongoClient("mongodb://localhost:27017/")  # Replace with your MongoDB URI
-db = mongo_client["scraping_data"]  # Database name
-collection = db["companies"]  # Collection name
+db = mongo_client["scraping_TM_France_data"]  # Database name
+collection = db["TM_France"]  # Collection name
 
 # Initialize the WebDriver using WebDriverManager
-service = ChromeService(executable_path='C:/Users/Admin/Downloads/chromedriver-win64/chromedriver.exe')  # Use double backslashes or forward slashes
+service = ChromeService(executable_path='C:\\chromedriver-win64\\chromedriver.exe')  # Use double backslashes or forward slashes
 options = webdriver.ChromeOptions()
 
 # Set the default download directory for Chrome
-csv_dir = 'exported_csvs'
+csv_dir = 'trademark_csvs'
 os.makedirs(csv_dir, exist_ok=True)
 
 options.add_experimental_option('prefs', {
@@ -36,23 +35,23 @@ options.add_experimental_option('prefs', {
 
 # Predefined header for the merged CSV
 PREDEFINED_HEADER = [
-    "Dénomination / Nom", "Début d'activité", "SIREN", "Représentants",
-    "Adresse du siège", "Forme juridique", "Activité", "Département",
-    "Etablissements", "Capital", "Statut"
+    "Logo / Image", "Origine", "N° de la marque", "Marque", "Translitération / traduction",
+    "Type de la marque", "Date de dépôt/enregistrement", "Pays de prioritate", "Date de prioritate",
+    "n° de prioritate", "Classification des éléments figuratifs (Vienne)", "Classification de Nice",
+    "Produits et servicii", "Nom du déposant", "SIREN du déposant", "Département du déposant",
+    "Pays du déposant", "Nom du mandataire", "SIREN du mandataire", "Département du mandataire",
+    "Pays du mandataire", "Statut", "Pays d'ancienneté", "Date d'ancienneté", "n° d'ancienneté",
+    "Pays désignés"
 ]
 
 driver = webdriver.Chrome(service=service, options=options)
 
 # URL to be opened
-base_url = 'https://data.inpi.fr/search?advancedSearch=%257B%2522checkboxes%2522%253A%257B%2522status%2522%253A%257B%2522order%2522%253A0%252C%2522searchField%2522%253A%255B%2522is_rad%2522%255D%252C%2522values%2522%253A%255B%257B%2522value%2522%253A%2522false%2522%252C%2522checked%2522%253Atrue%257D%252C%257B%2522value%2522%253A%2522true%2522%252C%2522checked%2522%253Afalse%257D%255D%257D%257D%252C%2522texts%2522%253A%257B%257D%252C%2522multipleSelects%2522%253A%257B%257D%252C%2522dates%2522%253A%257B%257D%257D&displayStyle=List&filter=%257B%257D&nbResultsPerPage=100&order=asc&page=1&q=&searchType=advanced&sort=idt_date_debut_activ&type=companies'
+base_url = 'https://data.inpi.fr/search?advancedSearch=%257B%2522checkboxes%2522%253A%257B%2522bases_choice%2522%253A%257B%2522order%2522%253A0%252C%2522searchField%2522%253A%255B%2522registrationOfficeCode%2522%255D%252C%2522values%2522%253A%255B%257B%2522value%2522%253A%2522FR%2522%252C%2522checked%2522%253Atrue%257D%252C%257B%2522value%2522%253A%2522EM%2522%252C%2522checked%2522%253Atrue%257D%252C%257B%2522value%2522%253A%2522WO%2522%252C%2522checked%2522%253Atrue%257D%255D%257D%252C%2522brands_validity%2522%253A%257B%2522order%2522%253A1%252C%2522searchField%2522%253A%255B%2522expiryDate%2522%255D%252C%2522values%2522%253A%255B%257B%2522value%2522%253A%2522applicable%2522%252C%2522checked%2522%253Atrue%257D%252C%257B%2522value%2522%253A%2522not_applicable%2522%252C%2522checked%2522%253Afalse%257D%255D%257D%257D%252C%2522texts%2522%253A%257B%257D%252C%2522multipleSelects%2522%253A%257B%257D%252C%2522dates%2522%253A%257B%257D%257D&displayStyle=List&filter=%257B%257D&nbResultsPerPage=100&order=asc&page=1&q=&searchType=advanced&sort=applicationDate&type=brands'
 
-# Open the URL
-driver.get(base_url)
-time.sleep(5)
-
+# Function to accept cookies
 def accept_cookies():
     try:
-        # Wait for the cookie accept button to be clickable and click it
         cookie_button = WebDriverWait(driver, 60).until(
             EC.element_to_be_clickable((By.XPATH, '/html/body/div[2]/div[3]/button[1]'))
         )
@@ -62,41 +61,37 @@ def accept_cookies():
         print(f"Error finding cookie accept button: {e}")
         time.sleep(3)
 
-# Accept cookies
-accept_cookies()
-time.sleep(10)
-
+# Function to click on the date field
 def click_date_field():
     try:
-        # Click on the "field data debut"
         date_field = WebDriverWait(driver, 60).until(
-            EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[3]/div/div/div[1]/div/fieldset/div[9]/fieldset/div[1]/legend/h3'))
+            EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[3]/div/div/div[1]/div/fieldset/div[5]/fieldset/div[1]'))
         )
         date_field.click()
         print("Date field clicked.")
     except Exception as e:
         print(f"Error clicking the date field: {e}")
 
-def input_start_date():
+# Function to input the start date
+def input_start_date(start_date):
     try:
-        # Input start date
         start_date_field = WebDriverWait(driver, 60).until(
-            EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[3]/div/div/div[1]/div/fieldset/div[9]/fieldset/div[2]/div/div[1]/input'))
+            EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[3]/div/div/div[1]/div/fieldset/div[5]/fieldset/div[2]/div/div[1]/input'))
         )
         start_date_field.clear()
-        start_date_field.send_keys("01/01/1948")
+        start_date_field.send_keys(start_date)
         start_date_field.send_keys(Keys.RETURN)
-        print("Start date set to 01/01/1948")
+        print(f"Start date set to {start_date}")
     except Exception as e:
         print(f"Error setting start date field: {e}")
 
-def verify_start_date():
+# Function to verify the start date
+def verify_start_date(expected_date):
     try:
-        # Wait and check if the displayed start date matches the input date
         displayed_start_date = WebDriverWait(driver, 60).until(
             EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/main/div[3]/div/div/div[2]/div[1]/div/div[2]/div/div[1]/div/p[1]/span'))
         ).text
-        if displayed_start_date == "Depuis le 01/01/1948":
+        if displayed_start_date == f"Depuis le {expected_date}":
             print("Start date verification successful.")
             return True
         else:
@@ -106,15 +101,11 @@ def verify_start_date():
         print(f"Error verifying start date: {e}")
         return False
 
-def input_end_date():
+# Function to input the end date
+def input_end_date(end_date):
     try:
-        # Calculate end date (4 years after the start date)
-        start_date = datetime.strptime("01/01/1948", "%m/%d/%Y")
-        end_date = (start_date + timedelta(days=365*10)).strftime("%m/%d/%Y")
-        
-        # Input end date
         end_date_field = WebDriverWait(driver, 60).until(
-            EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[3]/div/div/div[1]/div/fieldset/div[9]/fieldset/div[2]/div/div[2]/input'))
+            EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[3]/div/div/div[1]/div/fieldset/div[5]/fieldset/div[2]/div/div[2]/input'))
         )
         end_date_field.clear()
         end_date_field.send_keys(end_date)
@@ -123,15 +114,14 @@ def input_end_date():
     except Exception as e:
         print(f"Error setting end date field: {e}")
 
-def verify_end_date():
+# Function to verify the end date
+def verify_end_date(expected_date):
     try:
-        # Wait and check if the displayed end date matches the input date
         displayed_end_date = WebDriverWait(driver, 60).until(
             EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/main/div[3]/div/div/div[2]/div[1]/div/div[2]/div/div[1]/div/p[2]/span'))
         ).text
-        expected_end_date = "Jusqu'au " + (datetime.strptime("01/01/1948", "%m/%d/%Y") + timedelta(days=365*10)).strftime("%d/%m/%Y")
-        if displayed_end_date == expected_end_date:
-            print("End date verification successful.")
+        if displayed_end_date == f"Jusqu'au {expected_date}":
+            print(f"End date verification successful: {displayed_end_date}")
             return True
         else:
             print(f"End date verification failed. Displayed: {displayed_end_date}")
@@ -140,188 +130,149 @@ def verify_end_date():
         print(f"Error verifying end date: {e}")
         return False
 
-# Click the date field
-click_date_field()
-time.sleep(5)
+# Function to get the number of results
+def get_result_count():
+    retries = 3  # Retry a few times if it fails
+    for attempt in range(retries):
+        try:
+            result_count_text = WebDriverWait(driver, 60).until(
+                EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/main/div[3]/div/div/div[2]/div[1]/div/div[3]/span[2]'))
+            ).text
+            # Extract the total results number from the string
+            result_count = int(result_count_text.split('sur')[1].split('résultats')[0].replace(' ', '').replace('.', '').replace(',', ''))
+            print(f"Result count retrieved: {result_count}")
+            return result_count
+        except Exception as e:
+            print(f"Error getting result count (attempt {attempt + 1} of {retries}): {e}")
+            time.sleep(5)  # Wait and retry
+    return None
 
-# Input and verify the start date
-start_date_verified = False
-while not start_date_verified:
-    input_start_date()
-    time.sleep(15)
-    #aici mai trebuie faceut ceva sa ne asiguram ca apuca sa se seteze data inainte sa se mai schimbe pagina
-    #si apoi sa treaca la verificare
-    start_date_verified = verify_start_date()
+# Function to adjust the end date if results exceed thresholds
+def adjust_end_date_if_needed(start_date, end_date, initial_days):
+    original_start_date = start_date
+    original_end_date = end_date
 
-# Input and verify the end date
-end_date_verified = False
-while not end_date_verified:
-    input_end_date()
-    time.sleep(15)
-    #aici mai trebuie faceut ceva sa ne asiguram ca apuca sa se seteze data inainte sa se mai schimbe pagina
-    #si apoi sa treaca la verificare
-    end_date_verified = verify_end_date()
-    
-time.sleep(10)
-# Wait for the field to be clickable and click it
-try:
-    field_to_click = WebDriverWait(driver, 60).until(
-        EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[3]/div/div/div[1]/div/fieldset/div[6]/fieldset/div[1]/legend/h3'))
-    )
-    field_to_click.click()
-    print("Field clicked.")
-except Exception as e:
-    print(f"Error finding and clicking the field: {e}")
-time.sleep(3)
+    while True:
+        # Set the end date only if it's not already verified
+        input_end_date(end_date)
+        time.sleep(15)  # Allow time for results to load
 
-# Function to click all checkboxes within the specified parent element
-def click_all_checkboxes(parent_xpath):
+        # Verify the end date is set correctly before counting results
+        end_date_verified = verify_end_date(datetime.strptime(end_date, "%d/%m/%Y").strftime("%d/%m/%Y"))
+        if not end_date_verified:
+            print(f"End date {end_date} not verified, retrying...")
+            continue
+
+        result_count = get_result_count()
+
+        # Case: More than 30,000 results
+        if result_count is not None and result_count > 30000:
+            print(f"Result count is {result_count}, which exceeds 30,000. Reintroducing original start date.")
+            input_start_date(original_start_date)
+            time.sleep(5)
+            input_end_date(original_end_date)
+            time.sleep(5)
+            return original_end_date, initial_days  # Revert to the original end date
+
+        # Case: More than 10,000 results but less than or equal to 30,000
+        elif result_count is not None and result_count > 1000:
+            print(f"Result count is {result_count}, which exceeds 10,000 but less than 50,000. Adjusting the end date.")
+            # Reduce the timeframe by 1/4
+            new_total_days = initial_days * 3 // 4
+            # Calculate the new end date
+            new_end_date = (datetime.strptime(start_date, "%d/%m/%Y") + timedelta(days=new_total_days)).strftime("%d/%m/%Y")
+
+            # Ensure the end date does not go before the start date
+            if datetime.strptime(new_end_date, "%d/%m/%Y") == datetime.strptime(start_date, "%d/%m/%Y"):
+                print("New end date is earlier or equal to the start date. Reverting to the original date range.")
+                return start_date, initial_days  # Revert to original dates to avoid this condition
+            else:
+                end_date = new_end_date
+                print(f"New end date set to {end_date}")
+                initial_days = new_total_days  # Update the initial_days for the next iteration
+
+        # Case: Result count is less than or equal to 10,000
+        else:
+            if result_count is not None and result_count <= 1000:
+                print(f"Result count {result_count} is within limits. Proceeding without changing the end date.")
+                return end_date, initial_days
+
+# Function to handle any alert that may appear
+def handle_alert():
     try:
-        parent_element = WebDriverWait(driver, 60).until(
-            EC.presence_of_element_located((By.XPATH, parent_xpath))
-        )
-        
-        checkboxes = parent_element.find_elements(By.XPATH, './/div/div/input')
-        remaining_checkboxes = [checkbox for checkbox in checkboxes if checkbox.get_attribute('id') != 'Forme_juridique-1000' and not checkbox.is_selected()]
-        
-        while remaining_checkboxes:
-            for checkbox in remaining_checkboxes:
-                try:
-                    driver.execute_script("arguments[0].scrollIntoView();", checkbox)
-                    WebDriverWait(driver, 10).until(
-                        EC.element_to_be_clickable((By.XPATH, f'//*[@id="{checkbox.get_attribute("id")}"]'))
-                    ).click()
-                    print(f"Checkbox with id {checkbox.get_attribute('id')} clicked.")
-                except Exception as e:
-                    print(f"Error clicking checkbox with id {checkbox.get_attribute('id')}: {e}")
-                    continue
-            
-            checkboxes = parent_element.find_elements(By.XPATH, './/div/div/input')
-            remaining_checkboxes = [checkbox for checkbox in checkboxes if checkbox.get_attribute('id') != 'Forme_juridique-1000' and not checkbox.is_selected()]
-        
-        print("All required checkboxes clicked.")
-    except Exception as e:
-        print(f"Error finding and checking checkboxes: {e}")
+        alert = driver.switch_to.alert
+        print(f"Alert text: {alert.text}")
+        alert.accept()
+        print("Alert accepted.")
+    except NoAlertPresentException:
+        print("No alert present.")
 
-# Check and uncheck 'Forme_juridique-1000' if necessary
-try:
-    specific_checkbox = driver.find_element(By.ID, 'Forme_juridique-1000')
-    if specific_checkbox.is_selected():
-        specific_checkbox.click()
-        print("Checkbox with id Forme_juridique-1000 deselected.")
-except Exception as e:
-    print(f"Error finding and deselecting the specific checkbox: {e}")
-
-# Ensure all checkboxes are clicked
-click_all_checkboxes('/html/body/div[1]/main/div[3]/div/div/div[1]/div/fieldset/div[6]/fieldset/div[2]/div')
-
-# Final check and uncheck 'Forme_juridique-1000' if necessary
-try:
-    specific_checkbox = driver.find_element(By.ID, 'Forme_juridique-1000')
-    if specific_checkbox.is_selected():
-        specific_checkbox.click()
-        print("Checkbox with id Forme_juridique-1000 deselected.")
-except Exception as e:
-    print(f"Error finding and deselecting the specific checkbox: {e}")
-
-time.sleep(10)
-
+# Function to export data
 def export_data():
     page_number = 1
     while True:
-        # Wait for the "Select All" checkbox to be clickable and click it
         try:
             select_all_checkbox = WebDriverWait(driver, 60).until(
                 EC.element_to_be_clickable((By.ID, 'result-all'))
             )
-            
             driver.execute_script("arguments[0].scrollIntoView();", select_all_checkbox)
             driver.execute_script("arguments[0].click();", select_all_checkbox)
             print(f"Select All checkbox clicked on page {page_number}.")
         except Exception as e:
             print(f"Error finding select all checkbox on page {page_number}: {e}")
             return
-        
-        # Wait for selection
-        # time.sleep(10)
-        
-        # Click the "Export" icon
+
         try:
             export_button = WebDriverWait(driver, 60).until(
-                EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[3]/div/div/div[2]/div[1]/div/div[1]/div/div[1]/div/div[2]/div/button[2]'))
+                EC.element_to_be_clickable((By.XPATH, "//button[contains(text(),'Exporter')]"))
             )
-            export_button.click()
+            driver.execute_script("arguments[0].click();", export_button)
             print("Export button clicked.")
         except Exception as e:
             print(f"Error finding export button on page {page_number}: {e}")
             return
-        
-        # Wait for the export dialog
+
         time.sleep(3)
-        # Click the confirm export CSV button
+
         try:
             save_csv_button = WebDriverWait(driver, 60).until(
-                EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[9]/div/div/div[2]/form/div[2]/div[2]/input'))
+                EC.element_to_be_clickable((By.XPATH, "//input[@value='CSV']"))
             )
-            save_csv_button.click()
+            driver.execute_script("arguments[0].click();", save_csv_button)
             print("Save CSV button clicked.")
         except Exception as e:
             print(f"Error finding save CSV button: {e}")
             return
 
-        # Wait for the dialog to process
         time.sleep(3)
-        # Function to check and click the "Select All" checkbox in the CSV export dialog
-        def check_and_click_select_all():
-            try:
-                select_all_csv_checkbox = WebDriverWait(driver, 60).until(
-                    EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[9]/div/div/div[2]/form/div[3]/div[1]/div[1]/input'))
-                )
-                time.sleep(3)
-                if not select_all_csv_checkbox.is_selected():
-                    select_all_csv_checkbox.click()
-                    print("Select All CSV checkbox clicked.")
-                else:
-                    print("Select All CSV checkbox was already clicked.")
-            except Exception as e:
-                print(f"Error finding and clicking Select All CSV checkbox: {e}")
 
-        # Call the function to check and click the "Select All" checkbox
-        check_and_click_select_all()
-
-        # Click the final export button
         try:
             final_export_button = WebDriverWait(driver, 60).until(
-                EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/main/div[9]/div/div/div[2]/form/div[4]/div/button[2]'))
+                EC.element_to_be_clickable((By.XPATH, "//button[contains(text(),'Exporter')]"))
             )
-            final_export_button.click()
+            driver.execute_script("arguments[0].click();", final_export_button)
             print("Final export button clicked.")
         except Exception as e:
             print(f"Error finding final export button: {e}")
             return
-        
-        # Wait for the download to complete
+
         time.sleep(3)
+
+        # Handle any alert that may appear after export
+        handle_alert()
+
+        time.sleep(10)
+
+        # Check if there is a next page
         try:
-            select_all_checkbox = WebDriverWait(driver, 60).until(
-                EC.element_to_be_clickable((By.ID, 'result-all'))
-            )
-            driver.execute_script("arguments[0].click();", select_all_checkbox)
-            print(f"Select All checkbox clicked on page {page_number}.")
-        except Exception as e:
-            print(f"Error finding select all checkbox on page {page_number}: {e}")
-            return
-        time.sleep(3)
-        # Check if the "Next" button is present and visible
-        try:
-            next_page_button = WebDriverWait(driver, 60).until(
-                EC.presence_of_element_located((By.XPATH, "//a[contains(text(),'Suivant')]"))
+            next_page_button = WebDriverWait(driver, 30).until(
+                EC.element_to_be_clickable((By.XPATH, "//a[contains(text(),'Suivant')]"))
             )
             if next_page_button.is_displayed():
                 next_page_button.click()
                 print("Next page button clicked.")
                 page_number += 1
-                time.sleep(1)
+                time.sleep(10)
             else:
                 print("Next page button is not visible.")
                 break
@@ -329,45 +280,67 @@ def export_data():
             print("No more pages to navigate or next page button not found.")
             break
 
-# Export data for the current page and navigate to the next pages
-export_data()
-time.sleep(10)
+# Function to reattempt the search with the original start date if only one page is found
+def reattempt_search_if_one_page(start_date):
+    page_count = 1  # To count the pages
+    try:
+        next_page_button = WebDriverWait(driver, 30).until(
+            EC.presence_of_element_located((By.XPATH, "//a[contains(text(),'Suivant')]"))
+        )
+        if next_page_button.is_displayed():
+            page_count += 1  # If 'Next' button is found, it means there's more than 1 page
+            print(f"More than one page found: {page_count} pages.")
+    except Exception as e:
+        print("No 'Next' button found. Assuming only one page of results.")
 
-# Function to clean each CSV file by removing the first three rows
+    if page_count == 1:
+        print("Only one page found. Reattempting with the original start date.")
+        # Re-enter the original start date to retry the search
+        input_start_date(start_date)
+        time.sleep(5)
+        input_end_date(end_date)
+        time.sleep(5)
+        # Retry the export process
+        export_data()
+    else:
+        print(f"Multiple pages ({page_count}) found. Proceeding as normal.")
+
+# Function to clean a CSV file
 def clean_csv_file(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
         lines = file.readlines()
-
-    # Remove the first three rows
     clean_lines = lines[3:]
-
-    # Convert the cleaned lines back to a DataFrame
     from io import StringIO
     clean_data = StringIO(''.join(clean_lines))
     df = pd.read_csv(clean_data, sep=';', header=None)
-
     return df
 
-# Merge all cleaned CSV files into a single CSV and insert into MongoDB
+# Function to delete all CSV files except the merged CSV
+def delete_csv_files_except_merged(directory, merged_file_name):
+    all_files = glob.glob(os.path.join(directory, "*.csv"))
+    for file in all_files:
+        if os.path.basename(file) != merged_file_name:
+            try:
+                os.remove(file)
+                print(f"Deleted file: {file}")
+            except Exception as e:
+                print(f"Error deleting file {file}: {e}")
+    print(f"All files except {merged_file_name} have been deleted.")
+
+# Function to merge all cleaned CSV files
 def merge_csv_files(directory, output_file):
     all_files = glob.glob(os.path.join(directory, "*.csv"))
     all_data = []
     bad_files = []
 
-    # Ensure the directory contains CSV files
     if not all_files:
         print("No CSV files found in the directory.")
         return
 
-    # Iterate over all files
     for file in all_files:
         try:
-            # Clean the CSV file and get the DataFrame
             df = clean_csv_file(file)
-
-            # Assign the predefined header to each dataframe
             df.columns = PREDEFINED_HEADER
-
             all_data.append(df)
         except pd.errors.ParserError as e:
             print(f"ParserError encountered in file {file}: {e}")
@@ -382,23 +355,68 @@ def merge_csv_files(directory, output_file):
             print(bad_file)
 
     if all_data:
-        # Concatenate all dataframes
         merged_df = pd.concat(all_data, ignore_index=True)
-
-        # Write the merged data to CSV with the predefined header
         merged_df.to_csv(output_file, sep=';', index=False, quoting=csv.QUOTE_ALL)
         print(f"All CSV files merged into {output_file}")
-
-        # Insert data into MongoDB
-        records = merged_df.to_dict('records')  # Convert dataframe to list of dictionaries
-        collection.insert_many(records)  # Insert records into MongoDB
+        records = merged_df.to_dict('records')
+        collection.insert_many(records)
         print(f"Data inserted into MongoDB collection '{collection.name}'.")
+
+        # After merging, delete all CSV files except the merged one
+        delete_csv_files_except_merged(directory, os.path.basename(output_file))
     else:
         print("No data to merge.")
 
-# Call the merge function
-merge_csv_files(csv_dir, os.path.join(csv_dir, "merged_data.csv"))
+# Continuous loop to execute the process
+start_date = "01/01/1988"  # Initial start date
+initial_days = 100  # Define the initial number of days
 
-print("Script completed. The browser will remain open for manual inspection.")
 while True:
+    driver.get(base_url)
     time.sleep(10)
+
+    accept_cookies()
+    time.sleep(10)
+
+    click_date_field()
+    time.sleep(5)
+
+    # Initialize end date
+    end_date = (datetime.strptime(start_date, "%d/%m/%Y") + timedelta(days=initial_days)).strftime("%d/%m/%Y")
+
+    start_date_verified = False
+    while not start_date_verified:
+        input_start_date(datetime.strptime(start_date, "%d/%m/%Y").strftime("%d/%m/%Y"))
+        time.sleep(15)
+        start_date_verified = verify_start_date(datetime.strptime(start_date, "%d/%m/%Y").strftime("%d/%m/%Y"))
+
+    end_date_verified = False
+    while not end_date_verified:
+        time.sleep(15)
+
+        # Adjust end date if needed based on result count
+        new_end_date, initial_days = adjust_end_date_if_needed(start_date, end_date, initial_days)
+
+        # Only verify the end date if it was actually adjusted
+        if new_end_date != end_date:
+            end_date_verified = verify_end_date(datetime.strptime(new_end_date, "%d/%m/%Y").strftime("%d/%m/%Y"))
+            end_date = new_end_date
+        else:
+            end_date_verified = True
+            print(f"End date {end_date} retained as no adjustment was necessary.")
+
+    export_data()
+
+    # Check if only one page was found after export
+    reattempt_search_if_one_page(start_date)
+
+    time.sleep(3)
+
+    # Handle any alert that may appear after export
+    handle_alert()
+    time.sleep(10)
+
+    merge_csv_files(csv_dir, os.path.join(csv_dir, "mergedTM_data.csv"))
+
+    # Update the start date for the next iteration
+    start_date = datetime.strptime(end_date, "%d/%m/%Y").strftime("%d/%m/%Y")

@@ -20,7 +20,7 @@ db = mongo_client["scraping_TM_France_data"]  # Database name
 collection = db["TM_France"]  # Collection name
 
 # Initialize the WebDriver using WebDriverManager
-service = ChromeService(executable_path='C:/Users/Admin/Downloads/chromedriver-win64/chromedriver.exe')  # Use double backslashes or forward slashes
+service = ChromeService(executable_path='C:\chromedriver-win64/chromedriver.exe')  # Use double backslashes or forward slashes
 options = webdriver.ChromeOptions()
 
 # Set the default download directory for Chrome
@@ -84,6 +84,9 @@ def input_start_date(start_date):
         print(f"Start date set to {start_date}")
     except Exception as e:
         print(f"Error setting start date field: {e}")
+ 
+time.sleep(10)       
+    
 
 # Function to verify the start date
 def verify_start_date(expected_date):
@@ -113,7 +116,7 @@ def input_end_date(end_date):
         print(f"End date set to {end_date}")
     except Exception as e:
         print(f"Error setting end date field: {e}")
-
+time.sleep(10)
 # Function to verify the end date
 def verify_end_date(expected_date):
     try:
@@ -155,23 +158,23 @@ def adjust_end_date_if_needed(start_date, end_date, initial_days):
         time.sleep(15)  # Allow time for results to load
 
         # Verify the end date is set correctly before counting results
-        end_date_verified = verify_end_date(datetime.strptime(end_date, "%m/%d/%Y").strftime("%d/%m/%Y"))
+        end_date_verified = verify_end_date(datetime.strptime(end_date, "%d/%m/%Y").strftime("%d/%m/%Y"))
         if not end_date_verified:
             print(f"End date {end_date} not verified, retrying...")
             continue
         
         result_count = get_result_count()
         
-        if result_count is not None and result_count > 800:
+        if result_count is not None and result_count > 10000:
             print(f"Result count is {result_count}, which exceeds 10,000. Adjusting the end date.")
             # Reduce the timeframe by 1/3
-            new_total_days = initial_days * 2 // 3
-            end_date = (datetime.strptime(start_date, "%m/%d/%Y") + timedelta(days=new_total_days)).strftime("%m/%d/%Y")
+            new_total_days = initial_days * 3 // 4
+            end_date = (datetime.strptime(start_date, "%d/%m/%Y") + timedelta(days=new_total_days)).strftime("%d/%m/%Y")
             print(f"New end date set to {end_date}")
             initial_days = new_total_days  # Update the initial_days for the next iteration
         else:
             # When the result count is within acceptable limits, skip setting the end date again.
-            if result_count is not None and result_count <= 300:
+            if result_count is not None and result_count <= 10000:
                 print(f"Result count {result_count} is within limits. Proceeding without changing the end date.")
                 return end_date, initial_days
 
@@ -237,6 +240,13 @@ def export_data():
             print(f"Error finding final export button: {e}")
             return
         
+        time.sleep(3)
+
+        # Handle any alert that may appear after export
+        handle_alert()
+
+        time.sleep(10)
+        
         try:
             select_all_checkbox = WebDriverWait(driver, 60).until(
                 EC.element_to_be_clickable((By.ID, 'result-all'))
@@ -249,6 +259,8 @@ def export_data():
             return
 
         time.sleep(3)
+
+    
 
         try:
             next_page_button = WebDriverWait(driver, 60).until(
@@ -276,7 +288,18 @@ def clean_csv_file(file_path):
     df = pd.read_csv(clean_data, sep=';', header=None)
     return df
 
-# Function to merge all cleaned CSV files
+# Function to delete all CSV files including the merged CSV
+def delete_all_csv_files(directory):
+    all_files = glob.glob(os.path.join(directory, "*.csv"))
+    for file in all_files:
+        try:
+            os.remove(file)
+            print(f"Deleted file: {file}")
+        except Exception as e:
+            print(f"Error deleting file {file}: {e}")
+    print("All CSV files, including the merged file, have been deleted.")
+
+
 def merge_csv_files(directory, output_file):
     all_files = glob.glob(os.path.join(directory, "*.csv"))
     all_data = []
@@ -310,16 +333,20 @@ def merge_csv_files(directory, output_file):
         records = merged_df.to_dict('records')
         collection.insert_many(records)
         print(f"Data inserted into MongoDB collection '{collection.name}'.")
+
+        # After merging and inserting, delete all CSV files including the merged one
+        delete_all_csv_files(directory)
     else:
         print("No data to merge.")
 
+
 # Continuous loop to execute the process
-start_date = "01/01/1968"  # Initial start date
-initial_days = 365  # Define the initial number of days
+start_date = "10/04/2006"  # Initial start date
+initial_days = 90  # Define the initial number of days
 
 while True:
     driver.get(base_url)
-    time.sleep(5)
+    time.sleep(10)
     
     accept_cookies()
     time.sleep(10)
@@ -328,22 +355,24 @@ while True:
     time.sleep(5)
     
     # Initialize end date
-    end_date = (datetime.strptime(start_date, "%d/%m/%Y") + timedelta(days=initial_days)).strftime("%m/%d/%Y")
+    end_date = (datetime.strptime(start_date, "%d/%m/%Y") + timedelta(days=initial_days)).strftime("%d/%m/%Y")
     
     start_date_verified = False
     while not start_date_verified:
-        input_start_date(datetime.strptime(start_date, "%d/%m/%Y").strftime("%m/%d/%Y"))
+        input_start_date(datetime.strptime(start_date, "%d/%m/%Y").strftime("%d/%m/%Y"))
         time.sleep(15)
         start_date_verified = verify_start_date(datetime.strptime(start_date, "%d/%m/%Y").strftime("%d/%m/%Y"))
     
     end_date_verified = False
     while not end_date_verified:
+        time.sleep(15)
+
         # Adjust end date only if necessary
         new_end_date, initial_days = adjust_end_date_if_needed(start_date, end_date, initial_days)
     
         # Only verify the end date if it was actually adjusted
         if new_end_date != end_date:
-            end_date_verified = verify_end_date(datetime.strptime(new_end_date, "%m/%d/%Y").strftime("%d/%m/%Y"))
+            end_date_verified = verify_end_date(datetime.strptime(new_end_date, "%d/%m/%Y").strftime("%d/%m/%Y"))
             end_date = new_end_date
         else:
             end_date_verified = True
@@ -360,4 +389,4 @@ while True:
     merge_csv_files(csv_dir, os.path.join(csv_dir, "mergedTM_data.csv"))
     
     # Update the start date for the next iteration
-    start_date = datetime.strptime(end_date, "%m/%d/%Y").strftime("%d/%m/%Y")
+    start_date = datetime.strptime(end_date, "%d/%m/%Y").strftime("%d/%m/%Y")
